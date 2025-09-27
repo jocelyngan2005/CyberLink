@@ -62,7 +62,7 @@ const DashboardLayout = ({ children, sidebarItems, title }) => {
         <div className="p-4">
           <button
             onClick={handleLogout}
-            className="flex items-center space-x-3 w-full px-4 py-3 text-sm font-medium text-red-600 hover:text-red-700 transition-colors duration-200"
+            className="flex items-center space-x-3 w-full px-4 py-3 text-sm font-medium text-red-600 hover:text-red-700 transition-colors duration-200 bg-transparent border-none outline-none"
           >
             <LogOut size={20} />
             <span>Logout</span>
