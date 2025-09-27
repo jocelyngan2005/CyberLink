@@ -42,7 +42,7 @@ const DashboardLayout = ({ children, sidebarItems, title }) => {
             <a
               key={index}
               href={item.href}
-              className={`flex items-center space-x-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 ${
+              className={`flex items-center space-x-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 no-underline ${
                 item.active 
                   ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-600' 
                   : 'text-gray-700 hover:bg-gray-100'
@@ -59,10 +59,10 @@ const DashboardLayout = ({ children, sidebarItems, title }) => {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-4">
           <button
             onClick={handleLogout}
-            className="flex items-center space-x-3 w-full px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+            className="flex items-center space-x-3 w-full px-4 py-3 text-sm font-medium text-red-600 hover:text-red-700 transition-colors duration-200"
           >
             <LogOut size={20} />
             <span>Logout</span>

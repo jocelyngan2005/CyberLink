@@ -96,6 +96,16 @@
   box-sizing: border-box;
 }
 
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+}
+
 body {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   background-color: var(--white);
@@ -1204,6 +1214,10 @@ body {
 /* Text Decoration */
 .text-transparent {
   color: transparent;
+}
+
+.no-underline {
+  text-decoration: none;
 }
 
 .bg-clip-text {

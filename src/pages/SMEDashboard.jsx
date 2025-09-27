@@ -429,6 +429,324 @@ const DeliveryLogistics = () => {
   )
 }
 
+const Analytics = () => {
+  const [timeRange, setTimeRange] = useState('7d')
+  const [selectedMetric, setSelectedMetric] = useState('revenue')
+
+  const analyticsData = {
+    revenue: {
+      current: 'RM 19,240',
+      previous: 'RM 15,680',
+      change: '+22.7%',
+      chartData: [
+        { day: 'Mon', value: 2840 },
+        { day: 'Tue', value: 3120 },
+        { day: 'Wed', value: 2950 },
+        { day: 'Thu', value: 3340 },
+        { day: 'Fri', value: 3890 },
+        { day: 'Sat', value: 1650 },
+        { day: 'Sun', value: 1450 }
+      ]
+    },
+    orders: {
+      current: '287',
+      previous: '234',
+      change: '+22.6%',
+      chartData: [
+        { day: 'Mon', value: 47 },
+        { day: 'Tue', value: 52 },
+        { day: 'Wed', value: 45 },
+        { day: 'Thu', value: 48 },
+        { day: 'Fri', value: 53 },
+        { day: 'Sat', value: 22 },
+        { day: 'Sun', value: 20 }
+      ]
+    },
+    customers: {
+      current: '1,247',
+      previous: '1,089',
+      change: '+14.5%',
+      chartData: [
+        { day: 'Mon', value: 189 },
+        { day: 'Tue', value: 205 },
+        { day: 'Wed', value: 178 },
+        { day: 'Thu', value: 198 },
+        { day: 'Fri', value: 234 },
+        { day: 'Sat', value: 123 },
+        { day: 'Sun', value: 120 }
+      ]
+    }
+  }
+
+  const topProducts = [
+    { name: 'Premium Coffee Blend', sales: 156, revenue: 'RM 4,680', growth: '+18%' },
+    { name: 'Tech Expo Lunch Box', sales: 89, revenue: 'RM 2,670', growth: '+25%' },
+    { name: 'Energy Drinks', sales: 234, revenue: 'RM 3,510', growth: '+12%' },
+    { name: 'Healthy Snack Pack', sales: 67, revenue: 'RM 1,340', growth: '+8%' },
+    { name: 'Fresh Sandwiches', sales: 123, revenue: 'RM 2,460', growth: '+22%' }
+  ]
+
+  const customerSegments = [
+    { segment: 'Tech Professionals', count: 456, percentage: 36.6, color: 'bg-blue-500' },
+    { segment: 'Students', count: 387, percentage: 31.0, color: 'bg-green-500' },
+    { segment: 'Event Attendees', count: 234, percentage: 18.8, color: 'bg-purple-500' },
+    { segment: 'Tourists', count: 170, percentage: 13.6, color: 'bg-orange-500' }
+  ]
+
+  const peakHours = [
+    { hour: '8:00 AM', orders: 23, percentage: 65 },
+    { hour: '12:00 PM', orders: 45, percentage: 90 },
+    { hour: '3:00 PM', orders: 31, percentage: 70 },
+    { hour: '6:00 PM', orders: 28, percentage: 60 },
+    { hour: '9:00 PM', orders: 12, percentage: 30 }
+  ]
+
+  return (
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-gray-900">Business Analytics</h1>
+        <div className="flex space-x-3">
+          <select 
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="90d">Last 3 months</option>
+            <option value="1y">Last year</option>
+          </select>
+          <button className="btn-primary">
+            Export Report
+          </button>
+        </div>
+      </div>
+
+      {/* Key Performance Indicators */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <MetricCard
+          title="Total Revenue"
+          value={analyticsData.revenue.current}
+          change={analyticsData.revenue.change}
+          icon={TrendingUp}
+          color="success"
+        />
+        <MetricCard
+          title="Total Orders"
+          value={analyticsData.orders.current}
+          change={analyticsData.orders.change}
+          icon={BarChart3}
+          color="primary"
+        />
+        <MetricCard
+          title="Customers"
+          value={analyticsData.customers.current}
+          change={analyticsData.customers.change}
+          icon={Users}
+          color="secondary"
+        />
+        <MetricCard
+          title="Avg. Order Value"
+          value="RM 67.08"
+          change="+5.2%"
+          icon={Star}
+          color="accent"
+        />
+      </div>
+
+      {/* Revenue Trend Chart */}
+      <div className="card">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-900">Revenue Trends</h2>
+          <div className="flex space-x-2">
+            {['revenue', 'orders', 'customers'].map((metric) => (
+              <button
+                key={metric}
+                onClick={() => setSelectedMetric(metric)}
+                className={`px-3 py-1 text-sm rounded-lg capitalize ${
+                  selectedMetric === metric 
+                    ? 'bg-primary-500 text-white' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {metric}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <div className="h-64 bg-gray-50 rounded-lg p-4 flex items-end space-x-2">
+          {analyticsData[selectedMetric].chartData.map((item, index) => (
+            <div key={index} className="flex-1 flex flex-col items-center">
+              <div 
+                className="w-full bg-primary-500 rounded-t mb-2 min-h-[4px]"
+                style={{ 
+                  height: `${(item.value / Math.max(...analyticsData[selectedMetric].chartData.map(d => d.value))) * 200}px` 
+                }}
+              ></div>
+              <span className="text-xs text-gray-600">{item.day}</span>
+            </div>
+          ))}
+        </div>
+        
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-gray-600">Current Period</div>
+              <div className="text-xl font-bold text-gray-900">{analyticsData[selectedMetric].current}</div>
+            </div>
+            <div className="text-right">
+              <div className="text-sm text-gray-600">vs Previous Period</div>
+              <div className="text-lg font-semibold text-green-600">{analyticsData[selectedMetric].change}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* Top Products */}
+        <div className="card">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Top Performing Products</h2>
+          <div className="space-y-4">
+            {topProducts.map((product, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-semibold text-sm">
+                    {index + 1}
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-900">{product.name}</div>
+                    <div className="text-sm text-gray-600">{product.sales} units sold</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-semibold text-gray-900">{product.revenue}</div>
+                  <div className="text-sm text-green-600">{product.growth}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Customer Segments */}
+        <div className="card">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Customer Segments</h2>
+          <div className="space-y-4">
+            {customerSegments.map((segment, index) => (
+              <div key={index} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-900">{segment.segment}</span>
+                  <span className="text-sm text-gray-600">{segment.count} customers</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="flex-1 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full ${segment.color}`}
+                      style={{ width: `${segment.percentage}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm text-gray-600 w-12">{segment.percentage}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h3 className="font-semibold text-blue-900 mb-2">Insights</h3>
+            <p className="text-sm text-blue-800">
+              Tech professionals represent your largest customer base. Consider creating targeted campaigns 
+              for productivity tools and premium coffee blends during peak working hours.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Peak Hours Analysis */}
+      <div className="card">
+        <h2 className="text-xl font-bold text-gray-900 mb-6">Peak Hours Analysis</h2>
+        <div className="grid md:grid-cols-5 gap-4">
+          {peakHours.map((hour, index) => (
+            <div key={index} className="text-center">
+              <div className="relative w-16 h-16 mx-auto mb-3">
+                <div className="absolute inset-0 bg-gray-200 rounded-full"></div>
+                <div 
+                  className="absolute inset-0 bg-primary-500 rounded-full"
+                  style={{ 
+                    clipPath: `conic-gradient(from 0deg, transparent ${100 - hour.percentage}%, #000 ${100 - hour.percentage}%)`,
+                    background: `conic-gradient(from 0deg, #3b82f6 ${hour.percentage}%, #e5e7eb ${hour.percentage}%)`
+                  }}
+                ></div>
+                <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
+                  <span className="text-xs font-semibold text-gray-900">{hour.orders}</span>
+                </div>
+              </div>
+              <div className="text-sm font-medium text-gray-900">{hour.hour}</div>
+              <div className="text-xs text-gray-600">{hour.percentage}% capacity</div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="mt-6 p-4 bg-yellow-50 rounded-lg">
+          <h3 className="font-semibold text-yellow-900 mb-2">Recommendation</h3>
+          <p className="text-sm text-yellow-800">
+            Consider increasing staff during lunch hours (12 PM) and offering early bird discounts 
+            during off-peak hours to balance demand throughout the day.
+          </p>
+        </div>
+      </div>
+
+      {/* Business Insights */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="card">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Insights</h3>
+          <div className="space-y-3">
+            <div className="flex items-start space-x-3">
+              <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+              <p className="text-sm text-gray-700">
+                Revenue increased by 22.7% compared to last period, driven by premium product sales.
+              </p>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+              <p className="text-sm text-gray-700">
+                Customer acquisition improved by 14.5%, with strong growth in the tech professional segment.
+              </p>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+              <p className="text-sm text-gray-700">
+                Peak demand occurs during lunch hours - consider dynamic pricing strategies.
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="card">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Action Items</h3>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3">
+              <input type="checkbox" className="w-4 h-4 text-primary-600 rounded" />
+              <span className="text-sm text-gray-700">Launch targeted campaign for students</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <input type="checkbox" className="w-4 h-4 text-primary-600 rounded" />
+              <span className="text-sm text-gray-700">Optimize inventory for peak hours</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <input type="checkbox" className="w-4 h-4 text-primary-600 rounded" />
+              <span className="text-sm text-gray-700">Develop loyalty program for tech professionals</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <input type="checkbox" className="w-4 h-4 text-primary-600 rounded" />
+              <span className="text-sm text-gray-700">Expand premium product offerings</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const FreelancerMarketplace = () => {
   const [selectedFreelancer, setSelectedFreelancer] = useState(null)
   const [showJobPostModal, setShowJobPostModal] = useState(false)
@@ -566,6 +884,7 @@ const SMEDashboard = () => {
     <DashboardLayout sidebarItems={sidebarItems} title="SME Dashboard">
       <Routes>
         <Route path="/" element={<SMEHome />} />
+        <Route path="/analytics" element={<Analytics />} />
         <Route path="/campaigns" element={<CampaignStudio />} />
         <Route path="/delivery" element={<DeliveryLogistics />} />
         <Route path="/freelancers" element={<FreelancerMarketplace />} />
