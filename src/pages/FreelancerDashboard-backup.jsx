@@ -421,149 +421,17 @@ const FreelancerOnboarding = ({ onComplete, existingPreferences }) => {
   )
 }
 
-// HARDCODED TRADITIONAL CALENDAR COMPONENT
+// NEW FEATURE 1: AVAILABILITY CALENDAR COMPONENT
 const FreelancerCalendar = () => {
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 9, 1)) // October 2025
-  const [selectedDate, setSelectedDate] = useState(null)
-  
-  // Hardcoded events data - More events for better showcase
-  const events = [
-    { 
-      id: 1,
-      date: '2025-10-15', 
-      title: 'Tech Expo Photography', 
-      client: 'Tech Solutions',
-      startTime: '14:00',
-      endTime: '18:00',
-      category: 'work',
-      color: 'bg-blue-500',
-      description: 'Corporate event photography at Cyberjaya Convention Center.',
-      rate: 450,
-      status: 'confirmed'
-    },
-    { 
-      id: 2,
-      date: '2025-10-16', 
-      title: 'Wedding Photography', 
-      client: 'Sarah & Ahmad',
-      startTime: '09:00',
-      endTime: '17:00',
-      category: 'personal',
-      color: 'bg-purple-500',
-      description: 'Full day wedding coverage at KLCC Park.',
-      rate: 2800,
-      status: 'confirmed'
-    },
-    { 
-      id: 3,
-      date: '2025-10-17', 
-      title: 'Product Launch', 
-      client: 'Innovation Co',
-      startTime: '15:00',
-      endTime: '19:00',
-      category: 'work',
-      color: 'bg-blue-500',
-      description: 'Product photography for new tech gadget launch.',
-      rate: 520,
-      status: 'pending'
-    },
-    {
-      id: 4,
-      date: '2025-10-03',
-      title: 'Corporate Headshots',
-      client: 'ABC Corporation',
-      startTime: '10:00',
-      endTime: '14:00',
-      category: 'work',
-      color: 'bg-blue-500',
-      description: 'Professional headshots for company executives.',
-      rate: 300,
-      status: 'confirmed'
-    },
-    {
-      id: 5,
-      date: '2025-10-24',
-      title: 'Birthday Party',
-      client: 'The Johnson Family',
-      startTime: '16:00',
-      endTime: '20:00',
-      category: 'personal',
-      color: 'bg-purple-500',
-      description: 'Children birthday party photography.',
-      rate: 250,
-      status: 'confirmed'
-    },
-    {
-      id: 6,
-      date: '2025-10-31',
-      title: 'Halloween Event',
-      client: 'Community Center',
-      startTime: '18:00',
-      endTime: '22:00',
-      category: 'event',
-      color: 'bg-orange-500',
-      description: 'Halloween community event photography.',
-      rate: 400,
-      status: 'confirmed'
-    },
-    {
-      id: 7,
-      date: '2025-10-05',
-      title: 'Fashion Show',
-      client: 'Style Boulevard',
-      startTime: '19:00',
-      endTime: '23:00',
-      category: 'event',
-      color: 'bg-pink-500',
-      description: 'High-end fashion show at KL Convention Centre.',
-      rate: 600,
-      status: 'pending'
-    },
-    {
-      id: 8,
-      date: '2025-10-12',
-      title: 'Corporate Event',
-      client: 'Malaysia Tech Summit',
-      startTime: '08:00',
-      endTime: '17:00',
-      category: 'work',
-      color: 'bg-blue-500',
-      description: 'Annual tech summit with keynote speakers.',
-      rate: 800,
-      status: 'confirmed'
-    },
-    {
-      id: 9,
-      date: '2025-10-20',
-      title: 'Food Festival',
-      client: 'Taste of KL',
-      startTime: '11:00',
-      endTime: '20:00',
-      category: 'event',
-      color: 'bg-green-500',
-      description: 'Food photography at local culinary festival.',
-      rate: 350,
-      status: 'confirmed'
-    },
-    {
-      id: 10,
-      date: '2025-10-28',
-      title: 'Real Estate Shoot',
-      client: 'Prime Properties',
-      startTime: '10:00',
-      endTime: '16:00',
-      category: 'work',
-      color: 'bg-indigo-500',
-      description: 'Luxury property photography for marketing.',
-      rate: 450,
-      status: 'pending'
-    }
-  ]
-
-  const monthNames = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 
-                      'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER']
-  
-  const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [blockedDates, setBlockedDates] = useState([
+    '2025-10-15', '2025-10-22', '2025-10-29'
+  ])
+  const [bookings, setBookings] = useState([
+    { date: '2025-10-15', title: 'Tech Expo Photography', client: 'Tech Solutions', time: '2-6pm', status: 'confirmed' },
+    { date: '2025-10-22', title: 'Wedding Photography', client: 'Sarah & Ahmad', time: '10am-6pm', status: 'confirmed' },
+    { date: '2025-10-18', title: 'Product Launch', client: 'Startup Hub', time: '3-7pm', status: 'pending' }
+  ])
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear()
@@ -571,366 +439,177 @@ const FreelancerCalendar = () => {
     const firstDay = new Date(year, month, 1)
     const lastDay = new Date(year, month + 1, 0)
     const daysInMonth = lastDay.getDate()
-    const startingDayOfWeek = firstDay.getDay() // 0 = Sunday
+    const startingDayOfWeek = firstDay.getDay()
     
     return { daysInMonth, startingDayOfWeek, year, month }
   }
 
   const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentDate)
+  
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                      'July', 'August', 'September', 'October', 'November', 'December']
 
-  const getEventsForDate = (dateStr) => {
-    return events.filter(event => event.date === dateStr)
+  const toggleBlockDate = (dateStr) => {
+    setBlockedDates(prev => 
+      prev.includes(dateStr) 
+        ? prev.filter(d => d !== dateStr)
+        : [...prev, dateStr]
+    )
   }
 
-  const handleDateClick = (day) => {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    setSelectedDate(dateStr)
+  const getDateString = (day) => {
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
   }
 
-  const navigateMonth = (direction) => {
-    const newDate = new Date(currentDate)
-    newDate.setMonth(currentDate.getMonth() + direction)
-    setCurrentDate(newDate)
-  }
-
-  const goToToday = () => {
-    setCurrentDate(new Date())
-  }
-
-  const selectedEvents = selectedDate ? getEventsForDate(selectedDate) : []
-
-  // Get previous month's last days for the calendar grid
-  const getPrevMonthDays = () => {
-    const prevMonth = new Date(year, month - 1, 0)
-    const lastDate = prevMonth.getDate()
-    const days = []
-    
-    for (let i = startingDayOfWeek - 1; i >= 0; i--) {
-      days.push(lastDate - i)
-    }
-    return days
-  }
-
-  // Get next month's first days for the calendar grid
-  const getNextMonthDays = () => {
-    const totalCells = 42 // 6 rows × 7 days
-    const usedCells = startingDayOfWeek + daysInMonth
-    const remainingCells = totalCells - usedCells
-    const days = []
-    
-    for (let i = 1; i <= remainingCells; i++) {
-      days.push(i)
-    }
-    return days
+  const getDateStatus = (dateStr) => {
+    const booking = bookings.find(b => b.date === dateStr)
+    if (booking) return { type: 'booking', data: booking }
+    if (blockedDates.includes(dateStr)) return { type: 'blocked' }
+    return { type: 'available' }
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">📅 Calendar</h1>
-          <p className="text-gray-600">Manage your bookings and availability</p>
+          <h1 className="text-2xl font-bold text-gray-900">📅 Availability Calendar</h1>
+          <p className="text-gray-600">Manage your schedule and prevent double bookings</p>
         </div>
-        
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2">
           <button 
-            onClick={goToToday}
-            className="px-4 py-2 text-sm font-semibold text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100"
+            onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))}
+            className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
           >
-            Today
+            <ChevronLeft size={20} />
           </button>
-          
-          <div className="flex items-center space-x-2">
-            <button 
-              onClick={() => navigateMonth(-1)}
-              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <span className="px-4 py-2 font-bold text-gray-900 text-lg">
-              {year}
-            </span>
-            <button 
-              onClick={() => navigateMonth(1)}
-              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-blue-500 rounded-xl p-4 text-black">
-          <div className="text-sm opacity-90">This Month</div>
-          <div className="text-2xl font-bold">{events.length} events</div>
-        </div>
-        <div className="bg-green-500 rounded-xl p-4 text-white">
-          <div className="text-sm opacity-90">Revenue</div>
-          <div className="text-2xl font-bold">
-            RM {events.reduce((sum, e) => sum + e.rate, 0).toLocaleString()}
-          </div>
-        </div>
-        <div className="bg-purple-500 rounded-xl p-4 text-black">
-          <div className="text-sm opacity-90">Bookings</div>
-          <div className="text-2xl font-bold">Active</div>
+          <span className="px-4 py-2 font-semibold">{monthNames[month]} {year}</span>
+          <button 
+            onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))}
+            className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            <ChevronRight size={20} />
+          </button>
         </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Traditional Calendar - Red Style like reference image */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 overflow-hidden shadow-lg max-w-2xl">
-          {/* Calendar Header - Red style */}
-          <div className="bg-red-500 text-white text-center py-4 relative">
-            <div className="flex justify-center items-center space-x-2 mb-2">
-              <div className="w-2 h-8 bg-red-600 rounded"></div>
-              <div className="w-2 h-8 bg-red-600 rounded"></div>
-              <div className="w-2 h-8 bg-red-600 rounded"></div>
-              <div className="w-2 h-8 bg-red-600 rounded"></div>
-              <div className="w-2 h-8 bg-red-600 rounded"></div>
-              <div className="w-2 h-8 bg-red-600 rounded"></div>
-              <div className="w-2 h-8 bg-red-600 rounded"></div>
-            </div>
-            <h2 className="text-2xl font-bold">Calendar</h2>
+        {/* Calendar Grid */}
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+          {/* Calendar Header */}
+          <div className="grid grid-cols-7 gap-1 mb-4">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div key={day} className="text-center text-sm font-semibold text-gray-600 py-3 bg-gray-50 rounded-lg">
+                {day}
+              </div>
+            ))}
           </div>
-
-          {/* Days of Week Header */}
-          <div className="bg-red-500 text-white">
-            <div className="grid grid-cols-7 text-center text-sm font-semibold py-2">
-              <div>Sunday</div>
-              <div>Monday</div>
-              <div>Tuesday</div>
-              <div>Wednesday</div>
-              <div>Thursday</div>
-              <div>Friday</div>
-              <div className="text-red-200">Saturday</div>
-            </div>
-          </div>
-
-          {/* Calendar Grid */}
-          <div className="bg-white p-2">
-            <div className="text-center mb-4">
-              <h3 className="text-xl font-bold text-gray-900">{monthNames[month]} {year}</h3>
-            </div>
+          
+          {/* Calendar Body */}
+          <div className="grid grid-cols-7 gap-1">
+            {/* Empty cells for days before month starts */}
+            {[...Array(startingDayOfWeek)].map((_, i) => (
+              <div key={`empty-${i}`} className="aspect-square p-2"></div>
+            ))}
             
-            <div className="grid grid-cols-7 gap-1">
-              {/* Generate full calendar grid */}
-              {(() => {
-                const firstDay = new Date(year, month, 1).getDay()
-                const daysInPrevMonth = new Date(year, month, 0).getDate()
-                const totalDays = daysInMonth
-                const cells = []
-                
-                // Previous month days (grayed out)
-                for (let i = firstDay - 1; i >= 0; i--) {
-                  cells.push(
-                    <div key={`prev-${i}`} className="aspect-square flex items-center justify-center text-gray-300 text-lg">
-                      {daysInPrevMonth - i}
-                    </div>
-                  )
-                }
-                
-                // Current month days
-                for (let day = 1; day <= totalDays; day++) {
-                  const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-                  const dayEvents = getEventsForDate(dateStr)
-                  const isToday = new Date().getDate() === day && 
-                                 new Date().getMonth() === month && 
-                                 new Date().getFullYear() === year
-                  const isSelected = selectedDate === dateStr
-                  const isWeekend = (firstDay + day - 1) % 7 === 0 || (firstDay + day - 1) % 7 === 6
-                  
-                  cells.push(
-                    <button
-                      key={day}
-                      onClick={() => handleDateClick(day)}
-                      className={`aspect-square flex flex-col items-center justify-center text-lg font-bold border border-gray-100 hover:bg-red-50 transition-colors relative ${
-                        isToday ? 'bg-red-500 text-white rounded-lg' : 
-                        isWeekend ? 'text-red-500' : 'text-gray-900'
-                      } ${isSelected ? 'bg-blue-100 ring-2 ring-blue-500' : ''}`}
-                    >
-                      <span>{day}</span>
-                      
-                      {/* Event indicators */}
-                      {dayEvents.length > 0 && (
-                        <div className="absolute bottom-1 flex space-x-1">
-                          {dayEvents.slice(0, 3).map((event, idx) => (
-                            <div
-                              key={idx}
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                event.category === 'work' ? 'bg-blue-500' :
-                                event.category === 'personal' ? 'bg-purple-500' :
-                                event.category === 'event' ? 'bg-orange-500' :
-                                'bg-gray-500'
-                              }`}
-                            ></div>
-                          ))}
-                        </div>
-                      )}
-                    </button>
-                  )
-                }
-                
-                // Next month days to fill the grid (6 rows × 7 days = 42 cells)
-                const usedCells = firstDay + totalDays
-                const remainingCells = 42 - usedCells
-                for (let day = 1; day <= remainingCells; day++) {
-                  cells.push(
-                    <div key={`next-${day}`} className="aspect-square flex items-center justify-center text-gray-300 text-lg">
-                      {day}
-                    </div>
-                  )
-                }
-                
-                return cells
-              })()}
+            {/* Calendar days */}
+            {[...Array(daysInMonth)].map((_, i) => {
+              const day = i + 1
+              const dateStr = getDateString(day)
+              const status = getDateStatus(dateStr)
+              const isToday = new Date().getDate() === day && 
+                             new Date().getMonth() === month && 
+                             new Date().getFullYear() === year
+              
+              return (
+                <button
+                  key={day}
+                  onClick={() => toggleBlockDate(dateStr)}
+                  className={`aspect-square rounded-lg p-2 text-sm font-medium transition-all duration-200 relative border-2 flex flex-col items-center justify-center hover:shadow-md
+                    ${status.type === 'booking' && status.data.status === 'confirmed' 
+                      ? 'bg-green-50 border-green-400 text-green-800 hover:bg-green-100' 
+                      : status.type === 'booking' && status.data.status === 'pending'
+                      ? 'bg-yellow-50 border-yellow-400 text-yellow-800 hover:bg-yellow-100'
+                      : status.type === 'blocked'
+                      ? 'bg-red-50 border-red-400 text-red-800 hover:bg-red-100'
+                      : isToday
+                      ? 'bg-blue-100 border-blue-500 text-blue-800 font-bold'
+                      : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
+                    }`}
+                >
+                  <div className="font-semibold">{day}</div>
+                  {status.type === 'booking' && (
+                    <div className="w-2 h-2 rounded-full bg-current mt-1 opacity-60"></div>
+                  )}
+                  {status.type === 'blocked' && (
+                    <div className="w-2 h-2 rounded-full bg-current mt-1"></div>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Calendar Legend */}
+          <div className="flex items-center justify-center flex-wrap gap-6 mt-6 pt-6 border-t border-gray-200">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-green-50 border-2 border-green-400 rounded-lg"></div>
+              <span className="text-sm text-gray-600 font-medium">Confirmed</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-yellow-50 border-2 border-yellow-400 rounded-lg"></div>
+              <span className="text-sm text-gray-600 font-medium">Pending</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-red-50 border-2 border-red-400 rounded-lg"></div>
+              <span className="text-sm text-gray-600 font-medium">Blocked</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-blue-100 border-2 border-blue-500 rounded-lg"></div>
+              <span className="text-sm text-gray-600 font-medium">Today</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-white border-2 border-gray-200 rounded-lg"></div>
+              <span className="text-sm text-gray-600 font-medium">Available</span>
             </div>
           </div>
         </div>
 
-        {/* Right Sidebar - Event Details */}
-        <div className="space-y-4">
-          {/* Select Date Box */}
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-lg">
-            <div className="p-4 border-b border-gray-200 bg-gray-50">
-              <h3 className="font-bold text-gray-900">📅 Select a date</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                {selectedDate ? `Events for ${new Date(selectedDate).toLocaleDateString()}` : 'Click on any date to view events'}
-              </p>
-            </div>
-            
-            <div className="p-4">
-              {selectedDate ? (
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-3">
-                    <Calendar size={24} className="text-blue-600" />
-                  </div>
-                  <p className="font-semibold text-gray-900">
-                    {new Date(selectedDate).toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {selectedEvents.length} event{selectedEvents.length !== 1 ? 's' : ''} scheduled
-                  </p>
+        {/* Upcoming Bookings Sidebar */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Upcoming Bookings</h3>
+          <div className="space-y-3">
+            {bookings
+              .sort((a, b) => new Date(a.date) - new Date(b.date))
+              .map((booking, index) => (
+              <div key={index} className={`p-3 rounded-lg border-l-4 ${
+                booking.status === 'confirmed' ? 'border-green-500 bg-green-50' : 'border-yellow-500 bg-yellow-50'
+              }`}>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="font-semibold text-gray-900 text-sm">{booking.title}</div>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    booking.status === 'confirmed' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'
+                  }`}>
+                    {booking.status}
+                  </span>
                 </div>
-              ) : (
-                <div className="text-center py-6">
-                  <Calendar size={48} className="mx-auto text-gray-300 mb-3" />
-                  <p className="text-gray-500 text-sm">Select a date to view events</p>
-                </div>
-              )}
-            </div>
+                <div className="text-xs text-gray-600">{booking.client}</div>
+                <div className="text-xs text-gray-500 mt-1">{new Date(booking.date).toLocaleDateString()} • {booking.time}</div>
+              </div>
+            ))}
           </div>
 
-          {/* Individual Event Boxes */}
-          {selectedEvents.length > 0 && (
-            <div className="space-y-3 max-h-[600px] overflow-y-auto">
-              {selectedEvents.map(event => (
-                <div key={event.id} className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                  {/* Event Header */}
-                  <div className={`${event.color} bg-opacity-90 text-white p-4`}>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h4 className="font-bold text-lg">{event.title}</h4>
-                        <p className="text-sm opacity-90 mt-1">{event.client}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium
-                          ${event.status === 'confirmed' ? 'bg-green-500 bg-opacity-20 text-green-100' : 
-                            'bg-yellow-500 bg-opacity-20 text-yellow-100'}`}>
-                          {event.status === 'confirmed' ? '✓ Confirmed' : '⏳ Pending'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h4 className="text-sm font-semibold text-blue-900 mb-2">Quick Actions</h4>
+            <button className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+              Block Multiple Dates
+            </button>
+          </div>
 
-                  {/* Event Details */}
-                  <div className="p-4">
-                    <div className="space-y-3">
-                      {/* Time */}
-                      <div className="flex items-center text-gray-600">
-                        <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center mr-3">
-                          <Clock size={16} className="text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{event.startTime} - {event.endTime}</p>
-                          <p className="text-sm text-gray-500">
-                            Duration: {(() => {
-                              const start = new Date(`2000-01-01 ${event.startTime}`)
-                              const end = new Date(`2000-01-01 ${event.endTime}`)
-                              const diff = (end - start) / (1000 * 60 * 60)
-                              return `${diff} hours`
-                            })()}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Rate */}
-                      <div className="flex items-center text-gray-600">
-                        <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center mr-3">
-                          <DollarSign size={16} className="text-green-600" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-green-600 text-lg">RM {event.rate.toLocaleString()}</p>
-                          <p className="text-sm text-gray-500">Total payment</p>
-                        </div>
-                      </div>
-
-                      {/* Category */}
-                      <div className="flex items-center text-gray-600">
-                        <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center mr-3">
-                          <span className="text-purple-600 text-sm">
-                            {event.category === 'work' ? '💼' : 
-                             event.category === 'personal' ? '👥' : 
-                             event.category === 'event' ? '🎉' : '📋'}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900 capitalize">{event.category}</p>
-                          <p className="text-sm text-gray-500">Event type</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Description */}
-                    <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-700 leading-relaxed">{event.description}</p>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="mt-4 flex space-x-2">
-                      <button className="flex-1 py-2 px-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-                        View Details
-                      </button>
-                      <button className="flex-1 py-2 px-3 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
-                        Edit Event
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Add Event Button when date is selected but no events */}
-          {selectedDate && selectedEvents.length === 0 && (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-6 text-center">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">📝</span>
-              </div>
-              <h3 className="font-bold text-gray-900 mb-2">No events scheduled</h3>
-              <p className="text-gray-500 text-sm mb-4">This date is available for new bookings</p>
-              <button className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                + Add New Event
-              </button>
-            </div>
-          )}
+          <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+            <h4 className="text-sm font-semibold text-purple-900 mb-2">AI Suggestion</h4>
+            <p className="text-xs text-purple-700">
+              Based on demand forecast, consider keeping Oct 15-17 open for high-paying tech events (RM 450/hr avg)
+            </p>
+          </div>
         </div>
       </div>
     </div>

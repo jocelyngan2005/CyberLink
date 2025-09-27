@@ -1,0 +1,1260 @@
+import React, { useState, useEffect } from 'react'
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import DashboardLayout from '../components/DashboardLayout'
+import { EventCard, JobCard } from '../components/Cards'
+import { mockEvents, mockJobs } from '../data/mockData'
+import { 
+  Home, 
+  Calendar, 
+  Briefcase, 
+  User, 
+  Search, 
+  Filter,
+  MapPin,
+  Star,
+  Clock,
+  TrendingUp,
+  Ticket,
+  CreditCard,
+  CheckCircle,
+  Bot,
+  DollarSign,
+  Target,
+  BarChart3,
+  Zap,
+  AlertTriangle,
+  X,
+  Settings,
+  Activity,
+  MessageCircle,
+  Bell,
+  Send,
+  Paperclip,
+  Check,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react'
+
+const FreelancerOnboarding = ({ onComplete, existingPreferences }) => {
+  const [step, setStep] = useState(1)
+  const [preferences, setPreferences] = useState(
+    existingPreferences || {
+      expertise: [],
+      location: '',
+      priceRange: { min: 200, max: 800 },
+      availability: [],
+      workType: [],
+      experience: ''
+    }
+  )
+
+  const expertiseOptions = [
+    { id: 'photography', label: '📸 Photography', desc: 'Event, portrait, product photography' },
+    { id: 'videography', label: '🎥 Videography', desc: 'Corporate, wedding, promotional videos' },
+    { id: 'design', label: '🎨 Graphic Design', desc: 'Logos, branding, marketing materials' },
+    { id: 'writing', label: '✍️ Content Writing', desc: 'Articles, blogs, copywriting' },
+    { id: 'web', label: '💻 Web Development', desc: 'Websites, apps, e-commerce' },
+    { id: 'marketing', label: '📈 Digital Marketing', desc: 'SEO, social media, advertising' }
+  ]
+
+  const locationOptions = [
+    'Kuala Lumpur', 'Selangor', 'Penang', 'Johor', 'Melaka', 'Sabah', 'Sarawak', 'Remote/Online'
+  ]
+
+  const availabilityOptions = [
+    { id: 'weekdays', label: 'Weekdays' },
+    { id: 'weekends', label: 'Weekends' },
+    { id: 'evenings', label: 'Evenings' },
+    { id: 'flexible', label: 'Flexible Schedule' }
+  ]
+
+  const workTypeOptions = [
+    { id: 'corporate', label: '🏢 Corporate Events' },
+    { id: 'wedding', label: '💒 Weddings' },
+    { id: 'tech', label: '💻 Tech Events' },
+    { id: 'social', label: '🎉 Social Events' },
+    { id: 'startup', label: '🚀 Startup Events' }
+  ]
+
+  const handleExpertiseToggle = (expertiseId) => {
+    setPreferences(prev => ({
+      ...prev,
+      expertise: prev.expertise.includes(expertiseId)
+        ? prev.expertise.filter(id => id !== expertiseId)
+        : [...prev.expertise, expertiseId]
+    }))
+  }
+
+  const handleAvailabilityToggle = (availId) => {
+    setPreferences(prev => ({
+      ...prev,
+      availability: prev.availability.includes(availId)
+        ? prev.availability.filter(id => id !== availId)
+        : [...prev.availability, availId]
+    }))
+  }
+
+  const handleWorkTypeToggle = (typeId) => {
+    setPreferences(prev => ({
+      ...prev,
+      workType: prev.workType.includes(typeId)
+        ? prev.workType.filter(id => id !== typeId)
+        : [...prev.workType, typeId]
+    }))
+  }
+
+  const handleComplete = () => {
+    onComplete(preferences)
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="bg-white rounded-xl shadow-lg p-8">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {existingPreferences ? '⚙️ Update Your Preferences' : '🎯 Set Up Your Profile'}
+          </h1>
+          <p className="text-gray-600">
+            {existingPreferences 
+              ? 'Update your preferences to get better-matched opportunities' 
+              : 'Let us personalize your freelance experience'
+            }
+          </p>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-600">Step {step} of 4</span>
+            <span className="text-sm text-gray-500">{Math.round((step/4)*100)}% Complete</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{width: `${(step/4)*100}%`}}></div>
+          </div>
+        </div>
+
+        {/* Selected Items Display */}
+        {step === 1 && preferences.expertise.length > 0 && (
+          <div className="mb-6 p-3 bg-blue-50 rounded-lg">
+            <p className="text-sm font-medium text-blue-900 mb-2">Selected Services:</p>
+            <div className="flex flex-wrap gap-2">
+              {preferences.expertise.map(id => {
+                const option = expertiseOptions.find(opt => opt.id === id)
+                return (
+                  <span key={id} className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm">
+                    {option?.label}
+                  </span>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {step === 4 && preferences.experience && (
+          <div className="mb-6 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm font-medium text-blue-900 mb-2">Selected Experience Level:</p>
+            <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-medium">
+              {preferences.experience === 'beginner' ? '🌱 Beginner' :
+               preferences.experience === 'intermediate' ? '⭐ Intermediate' :
+               preferences.experience === 'expert' ? '🚀 Expert' :
+               preferences.experience === 'master' ? '👑 Master' : ''}
+            </span>
+          </div>
+        )}
+
+        {/* Step 1: Expertise */}
+        {step === 1 && (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">🎯 What's Your Expertise?</h2>
+              <p className="text-gray-600">Select all services you provide (choose multiple)</p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              {expertiseOptions.map(option => (
+                <button 
+                  key={option.id}
+                  onClick={() => handleExpertiseToggle(option.id)}
+                  className={`w-full p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 text-left
+                    ${preferences.expertise.includes(option.id) 
+                      ? 'border-blue-500 bg-blue-50 shadow-lg' 
+                      : 'border-transparent bg-transparent hover:border-blue-500 hover:shadow-xl hover:scale-105'
+                    }`}
+                >
+                  <div className="font-semibold text-gray-900 mb-1">{option.label}</div>
+                  <div className="text-sm text-gray-600">{option.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Location & Price */}
+        {step === 2 && (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">📍 Location & Pricing</h2>
+              <p className="text-gray-600">Help us find jobs that match your preferences</p>
+            </div>
+            
+            {preferences.location && (
+              <div className="mb-6 p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm font-medium text-blue-900 mb-2">Selected Location:</p>
+                <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm">
+                  {preferences.location}
+                </span>
+              </div>
+            )}
+            
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Preferred Location</label>
+                <select 
+                  value={preferences.location}
+                  onChange={(e) => setPreferences(prev => ({...prev, location: e.target.value}))}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                >
+                  <option value="">Select location...</option>
+                  {locationOptions.map(location => (
+                    <option key={location} value={location}>{location}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Acceptable Price Range (RM/hr)</label>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs text-gray-600">Minimum Rate</label>
+                    <input 
+                      type="range"
+                      min="100"
+                      max="1000"
+                      step="50"
+                      value={preferences.priceRange.min}
+                      onChange={(e) => setPreferences(prev => ({
+                        ...prev, 
+                        priceRange: {...prev.priceRange, min: parseInt(e.target.value)}
+                      }))}
+                      className="w-full"
+                    />
+                    <div className="text-center font-semibold text-blue-600">RM {preferences.priceRange.min}/hr</div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600">Maximum Rate</label>
+                    <input 
+                      type="range"
+                      min="200"
+                      max="1000"
+                      step="50"
+                      value={preferences.priceRange.max}
+                      onChange={(e) => setPreferences(prev => ({
+                        ...prev, 
+                        priceRange: {...prev.priceRange, max: parseInt(e.target.value)}
+                      }))}
+                      className="w-full"
+                    />
+                    <div className="text-center font-semibold text-blue-600">RM {preferences.priceRange.max}/hr</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Availability & Work Type */}
+        {step === 3 && (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">⏰ Availability & Preferences</h2>
+              <p className="text-gray-600">When are you available and what type of work do you prefer?</p>
+            </div>
+            
+            {/* Selected Items Display - Fixed Colors */}
+            {(preferences.availability.length > 0 || preferences.workType.length > 0) && (
+              <div className="mb-6 space-y-3">
+                {preferences.availability.length > 0 && (
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm font-medium text-blue-900 mb-2">Selected Availability:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {preferences.availability.map(id => {
+                        const option = availabilityOptions.find(opt => opt.id === id)
+                        return (
+                          <span key={id} className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-medium">
+                            {option?.label}
+                          </span>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+                {preferences.workType.length > 0 && (
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm font-medium text-blue-900 mb-2">Selected Work Types:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {preferences.workType.map(id => {
+                        const option = workTypeOptions.find(opt => opt.id === id)
+                        return (
+                          <span key={id} className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-medium">
+                            {option?.label}
+                          </span>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Availability (select all that apply)</label>
+                <div className="space-y-3">
+                  {availabilityOptions.map(option => (
+                    <button 
+                      key={option.id}
+                      onClick={() => handleAvailabilityToggle(option.id)}
+                      className={`w-full p-3 border-2 rounded-lg cursor-pointer transition-all duration-300 text-left
+                        ${preferences.availability.includes(option.id)
+                          ? 'border-green-500 bg-green-50 shadow-lg'
+                          : 'border-transparent bg-transparent hover:border-green-500 hover:shadow-xl hover:scale-105'
+                        }`}
+                    >
+                      <div className="font-medium text-gray-900">{option.label}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Preferred Work Types</label>
+                <div className="space-y-3">
+                  {workTypeOptions.map(option => (
+                    <button 
+                      key={option.id}
+                      onClick={() => handleWorkTypeToggle(option.id)}
+                      className={`w-full p-3 border-2 rounded-lg cursor-pointer transition-all duration-300 text-left
+                        ${preferences.workType.includes(option.id)
+                          ? 'border-purple-500 bg-purple-50 shadow-lg'
+                          : 'border-transparent bg-transparent hover:border-purple-500 hover:shadow-xl hover:scale-105'
+                        }`}
+                    >
+                      <div className="font-medium text-gray-900">{option.label}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Experience Level */}
+        {step === 4 && (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">🏆 Experience Level</h2>
+              <p className="text-gray-600">Help us match you with appropriate opportunities</p>
+            </div>
+            
+            <div className="space-y-4 max-w-2xl mx-auto">
+              {[
+                { id: 'beginner', label: '🌱 Beginner', desc: '0-2 years experience, learning the ropes' },
+                { id: 'intermediate', label: '⭐ Intermediate', desc: '2-5 years experience, solid skills' },
+                { id: 'expert', label: '🚀 Expert', desc: '5+ years experience, industry specialist' },
+                { id: 'master', label: '👑 Master', desc: '10+ years, thought leader in your field' }
+              ].map(option => (
+                <button 
+                  key={option.id}
+                  onClick={() => setPreferences(prev => ({...prev, experience: option.id}))}
+                  className={`w-full p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 text-left
+                    ${preferences.experience === option.id
+                      ? 'border-orange-500 bg-orange-50 shadow-lg'
+                      : 'border-transparent bg-transparent hover:border-orange-500 hover:shadow-xl hover:scale-105'
+                    }`}
+                >
+                  <div className="font-semibold text-gray-900 mb-1">{option.label}</div>
+                  <div className="text-sm text-gray-600">{option.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+          <button 
+            onClick={() => setStep(Math.max(1, step - 1))}
+            disabled={step === 1}
+            className="flex items-center px-6 py-3 border-2 border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Previous
+          </button>
+          
+          {step < 4 ? (
+            <button 
+              onClick={() => setStep(step + 1)}
+              className="flex items-center px-8 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 hover:shadow-lg transition-all duration-200"
+            >
+              Next
+              <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          ) : (
+            <button 
+              onClick={handleComplete}
+              className="flex items-center px-8 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 hover:shadow-lg transition-all duration-200"
+            >
+              🚀 Start Finding Jobs!
+              <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// GOOGLE CALENDAR INTEGRATION COMPONENT
+const FreelancerCalendar = () => {
+  const [currentDate, setCurrentDate] = useState(new Date(2025, 9, 1)) // October 2025
+  const [selectedDate, setSelectedDate] = useState(null)
+  const [events, setEvents] = useState([])
+  const [isSignedIn, setIsSignedIn] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [gapi, setGapi] = useState(null)
+  
+  // Check credentials immediately and show detailed error info
+  useEffect(() => {
+    const apiKey = import.meta.env.VITE_GOOGLE_API_KEY
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+    
+    console.log('=== GOOGLE API DIAGNOSTIC ===')
+    console.log('API Key exists:', !!apiKey)
+    console.log('API Key value:', apiKey ? `${apiKey.substring(0, 10)}...` : 'MISSING')
+    console.log('Client ID exists:', !!clientId)
+    console.log('Client ID value:', clientId ? `${clientId.substring(0, 20)}...` : 'MISSING')
+    console.log('Current URL:', window.location.origin)
+    console.log('============================')
+    
+    // Check for missing credentials
+    if (!apiKey || !clientId) {
+      const missing = []
+      if (!apiKey) missing.push('API Key')
+      if (!clientId) missing.push('Client ID')
+      setError(`❌ MISSING CREDENTIALS: ${missing.join(' and ')}. Check your .env file and restart the server.`)
+      return
+    }
+    
+    // Check for placeholder values
+    if (apiKey === 'your-api-key-here' || clientId.includes('your-friends-client-id-here')) {
+      setError('❌ PLACEHOLDER CREDENTIALS: Update the .env file with real Google API credentials')
+      return
+    }
+
+    // Check for common API key format
+    if (!apiKey.startsWith('AIza')) {
+      setError('❌ INVALID API KEY FORMAT: Google API keys should start with "AIza"')
+      return
+    }
+
+    // Check for common Client ID format
+    if (!clientId.includes('.apps.googleusercontent.com')) {
+      setError('❌ INVALID CLIENT ID FORMAT: Should end with ".apps.googleusercontent.com"')
+      return
+    }
+
+    console.log('✅ Credentials format looks correct!')
+    
+  }, [])
+  
+  // Initialize Google API
+  useEffect(() => {
+    const initializeGoogleAPI = async () => {
+      try {
+        console.log('Starting Google API initialization...')
+        console.log('API Key:', import.meta.env.VITE_GOOGLE_API_KEY ? `Present (${import.meta.env.VITE_GOOGLE_API_KEY.substring(0, 10)}...)` : 'Missing')
+        console.log('Client ID:', import.meta.env.VITE_GOOGLE_CLIENT_ID ? `Present (${import.meta.env.VITE_GOOGLE_CLIENT_ID.substring(0, 15)}...)` : 'Missing')
+        console.log('Current URL:', window.location.origin)
+        
+        // Load gapi script
+        await loadGoogleScript()
+        console.log('Google script loaded successfully')
+        
+        // Load Google client and auth2
+        await new Promise((resolve, reject) => {
+          window.gapi.load('client:auth2', resolve)
+        })
+        console.log('GAPI client and auth2 loaded')
+        
+        // Initialize the client
+        await window.gapi.client.init({
+          apiKey: import.meta.env.VITE_GOOGLE_API_KEY,
+          clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
+          scope: 'https://www.googleapis.com/auth/calendar.readonly'
+        })
+        console.log('GAPI client initialized successfully')
+        
+        setGapi(window.gapi)
+        const authInstance = window.gapi.auth2.getAuthInstance()
+        const signedIn = authInstance.isSignedIn.get()
+        setIsSignedIn(signedIn)
+        console.log('Auth status:', signedIn ? 'Signed in' : 'Not signed in')
+        
+        // Listen for auth state changes
+        authInstance.isSignedIn.listen(setIsSignedIn)
+        
+        // Clear any previous errors
+        setError(null)
+        console.log('✅ Google API initialization completed successfully!')
+        
+      } catch (err) {
+        console.error('❌ Failed to initialize Google API:', err)
+        
+        let errorMessage = 'Google API initialization failed: '
+        
+        if (err.message.includes('origin_mismatch')) {
+          errorMessage += `❌ ORIGIN MISMATCH: The current URL (${window.location.origin}) is not authorized in Google Cloud Console. Add it to "Authorized JavaScript origins"`
+        } else if (err.message.includes('redirect_uri_mismatch')) {
+          errorMessage += `❌ REDIRECT URI MISMATCH: Add "${window.location.origin}/" to "Authorized redirect URIs" in Google Cloud Console`
+        } else if (err.message.includes('API_KEY_INVALID')) {
+          errorMessage += '❌ INVALID API KEY: Check your Google API key in the .env file'
+        } else if (err.message.includes('CLIENT_ID_INVALID')) {
+          errorMessage += '❌ INVALID CLIENT ID: Check your Google Client ID in the .env file'
+        } else if (err.message.includes('GAPI_NOT_LOADED')) {
+          errorMessage += '❌ NETWORK ISSUE: Cannot load Google API scripts. Check your internet connection'
+        } else {
+          errorMessage += err.message
+        }
+        
+        setError(errorMessage)
+      }
+    }
+    
+    initializeGoogleAPI()
+  }, [])
+  
+  // Load Google script
+  const loadGoogleScript = () => {
+    return new Promise((resolve, reject) => {
+      if (window.gapi) {
+        console.log('Google API script already loaded')
+        resolve()
+        return
+      }
+      
+      console.log('Loading Google API script...')
+      const script = document.createElement('script')
+      script.src = 'https://apis.google.com/js/api.js'
+      script.onload = () => {
+        console.log('Google API script loaded from CDN')
+        resolve()
+      }
+      script.onerror = (error) => {
+        console.error('Failed to load Google API script:', error)
+        reject(new Error('Failed to load Google API script'))
+      }
+      document.head.appendChild(script)
+    })
+  }
+  
+  // Load calendar events
+  const loadCalendarEvents = async () => {
+    if (!gapi || !isSignedIn) {
+      // Use mock data when not signed in
+      setEvents([
+        { 
+          id: 1,
+          date: '2025-10-15', 
+          title: 'Tech Expo Photography', 
+          client: 'Tech Solutions',
+          startTime: '14:00',
+          endTime: '18:00',
+          category: 'work',
+          color: 'bg-blue-500',
+          description: 'Corporate event photography at Cyberjaya Convention Center. Bring wide-angle and portrait lenses.',
+          rate: 450
+        },
+        { 
+          id: 2,
+          date: '2025-10-16', 
+          title: 'Wedding Photography', 
+          client: 'Sarah & Ahmad',
+          startTime: '09:00',
+          endTime: '17:00',
+          category: 'personal',
+          color: 'bg-purple-500',
+          description: 'Full day wedding coverage at KLCC Park. Ceremony starts at 11am.',
+          rate: 2800
+        },
+        { 
+          id: 3,
+          date: '2025-10-17', 
+          title: 'Product Launch', 
+          client: 'Innovation Co',
+          startTime: '15:00',
+          endTime: '19:00',
+          category: 'work',
+          color: 'bg-blue-500',
+          description: 'Product photography for new tech gadget launch.',
+          rate: 520
+        }
+      ])
+      return
+    }
+    
+    try {
+      setLoading(true)
+      const response = await gapi.client.calendar.events.list({
+        calendarId: 'primary',
+        timeMin: new Date().toISOString(),
+        showDeleted: false,
+        singleEvents: true,
+        maxResults: 50,
+        orderBy: 'startTime'
+      })
+      
+      const googleEvents = response.result.items.map(event => ({
+        id: event.id,
+        title: event.summary || 'Untitled Event',
+        date: event.start.date || event.start.dateTime.split('T')[0],
+        startTime: event.start.dateTime ? new Date(event.start.dateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'All day',
+        endTime: event.end.dateTime ? new Date(event.end.dateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'All day',
+        description: event.description || 'No description',
+        category: 'work',
+        color: 'bg-green-500',
+        rate: 0
+      }))
+      
+      setEvents(googleEvents)
+      setError(null)
+    } catch (err) {
+      console.error('Failed to load calendar events:', err)
+      setError('Failed to load Google Calendar events')
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  // Sign in to Google
+  const handleSignIn = async () => {
+    if (!gapi) {
+      console.error('Google API not initialized')
+      setError('Google API not initialized. Please check your API credentials and network connection.')
+      return
+    }
+    
+    try {
+      setLoading(true)
+      console.log('Attempting to sign in to Google...')
+      const authInstance = gapi.auth2.getAuthInstance()
+      
+      if (!authInstance) {
+        throw new Error('Auth instance not available')
+      }
+      
+      await authInstance.signIn()
+      console.log('Successfully signed in to Google')
+      setError(null)
+      
+      // Load calendar events after successful sign in
+      await loadCalendarEvents()
+      
+    } catch (err) {
+      console.error('Sign in failed:', err)
+      setError(`Failed to sign in to Google Calendar: ${err.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  // Sign out from Google
+  const handleSignOut = async () => {
+    if (!gapi) return
+    
+    try {
+      const authInstance = gapi.auth2.getAuthInstance()
+      await authInstance.signOut()
+      setEvents([]) // Clear events on sign out
+    } catch (err) {
+      console.error('Sign out failed:', err)
+    }
+  }
+  
+  // Load events when signed in or current date changes
+  useEffect(() => {
+    loadCalendarEvents()
+  }, [isSignedIn, currentDate, gapi])
+
+  const bookings = events // Use events from Google Calendar or mock data
+
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                      'July', 'August', 'September', 'October', 'November', 'December']
+
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDayOfWeek = firstDay.getDay()
+    
+    return { daysInMonth, startingDayOfWeek, year, month }
+  }
+
+  const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentDate)
+
+  const getBookingsForDate = (dateStr) => {
+    return bookings.filter(b => b.date === dateStr)
+  }
+
+  const handleDateClick = (day) => {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    setSelectedDate(dateStr)
+  }
+
+  const navigateMonth = (direction) => {
+    const newDate = new Date(currentDate)
+    newDate.setMonth(currentDate.getMonth() + direction)
+    setCurrentDate(newDate)
+  }
+
+  const goToToday = () => {
+    setCurrentDate(new Date())
+  }
+
+  const selectedBookings = selectedDate ? getBookingsForDate(selectedDate) : []
+
+  return (
+    <div className="space-y-6">
+      {/* Header with Google Integration */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">📅 Google Calendar</h1>
+          <p className="text-gray-600">
+            {isSignedIn ? 'Connected to Google Calendar' : 'Manage your bookings and availability'}
+          </p>
+        </div>
+        
+        <div className="flex items-center space-x-4">
+          {/* Google Sign In/Out Button */}
+          <button 
+            onClick={isSignedIn ? handleSignOut : handleSignIn}
+            disabled={loading}
+            className={`px-4 py-2 text-sm font-semibold rounded-lg flex items-center space-x-2 ${
+              isSignedIn 
+                ? 'text-red-600 bg-red-50 hover:bg-red-100' 
+                : 'text-white bg-blue-600 hover:bg-blue-700'
+            } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full"></div>
+                <span>Loading...</span>
+              </>
+            ) : (
+              <span>{isSignedIn ? 'Sign Out' : 'Connect Google'}</span>
+            )}
+          </button>
+
+          <button 
+            onClick={goToToday}
+            className="px-4 py-2 text-sm font-semibold text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100"
+          >
+            Today
+          </button>
+          
+          <div className="flex items-center space-x-2">
+            <button 
+              onClick={() => navigateMonth(-1)}
+              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <span className="px-4 py-2 font-bold text-gray-900 text-lg">
+              {year}
+            </span>
+            <button 
+              onClick={() => navigateMonth(1)}
+              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <AlertTriangle size={20} className="text-red-600" />
+            <span className="text-red-800">{error}</span>
+            <button 
+              onClick={() => setError(null)}
+              className="ml-auto text-red-600 hover:text-red-800"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Setup Instructions when not connected */}
+      {!isSignedIn && !error && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 font-semibold">ℹ</span>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-blue-800">Connect Your Google Calendar</h3>
+              <p className="text-sm text-blue-700 mt-1">
+                You're currently viewing sample events. Click "Connect Google" to sync with your real Google Calendar events.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-blue-500 rounded-xl p-4 text-white">
+          <div className="text-sm opacity-90">This Month</div>
+          <div className="text-2xl font-bold">{bookings.length} events</div>
+        </div>
+        <div className="bg-green-500 rounded-xl p-4 text-white">
+          <div className="text-sm opacity-90">Revenue</div>
+          <div className="text-2xl font-bold">
+            {(() => {
+              const totalRevenue = bookings.reduce((sum, b) => sum + (b.rate || 0), 0)
+              if (totalRevenue > 0) {
+                return `RM ${totalRevenue.toLocaleString()}`
+              } else if (isSignedIn) {
+                return 'Google Events'
+              } else {
+                return `RM ${bookings.filter(b => b.rate > 0).reduce((sum, b) => sum + b.rate, 0).toLocaleString()}`
+              }
+            })()}
+          </div>
+        </div>
+        <div className="bg-purple-500 rounded-xl p-4 text-white">
+          <div className="text-sm opacity-90">Status</div>
+          <div className="text-2xl font-bold">
+            {isSignedIn ? '🟢 Connected' : '🔗 Ready'}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* iOS-Style Calendar - FIXED GRID */}
+        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 overflow-hidden">
+          {/* Month Name */}
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-3xl font-bold text-gray-900">{monthNames[month]}</h2>
+          </div>
+
+          {/* Days of Week Header */}
+          <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
+            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
+              <div key={index} className="py-3 text-center">
+                <span className="text-sm font-semibold text-gray-600">{day}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Calendar Grid - FIXED */}
+          <div className="p-2">
+            <div className="grid grid-cols-7 gap-1">
+              {/* Empty cells for days before month starts */}
+              {[...Array(startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1)].map((_, i) => (
+                <div key={`empty-${i}`} className="aspect-square"></div>
+              ))}
+              
+              {/* Calendar days */}
+              {[...Array(daysInMonth)].map((_, i) => {
+                const day = i + 1
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                const dayBookings = getBookingsForDate(dateStr)
+                const isToday = new Date().getDate() === day && 
+                               new Date().getMonth() === month && 
+                               new Date().getFullYear() === year
+                const isSelected = selectedDate === dateStr
+                
+                return (
+                  <button
+                    key={day}
+                    onClick={() => handleDateClick(day)}
+                    className={`aspect-square rounded-lg flex flex-col items-center justify-center relative transition-all hover:bg-gray-100 min-h-[60px] ${
+                      isToday ? 'bg-red-500 text-white font-bold hover:bg-red-600' : ''
+                    } ${isSelected && !isToday ? 'bg-blue-50 ring-2 ring-blue-500' : ''}`}
+                  >
+                    <span className={`text-xl font-semibold ${isToday ? 'text-white' : 'text-gray-900'}`}>
+                      {day}
+                    </span>
+                    
+                    {/* Event Dots */}
+                    {dayBookings.length > 0 && (
+                      <div className="absolute bottom-1 flex space-x-1">
+                        {dayBookings.slice(0, 3).map((booking, idx) => (
+                          <div
+                            key={idx}
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              booking.category === 'work' ? 'bg-blue-500' :
+                              booking.category === 'personal' ? 'bg-purple-500' :
+                              'bg-red-500'
+                            } ${isToday ? 'bg-white' : ''}`}
+                          ></div>
+                        ))}
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div className="flex items-center justify-center space-x-6 text-sm">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                <span className="text-gray-700">Work</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                <span className="text-gray-700">Personal</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                <span className="text-gray-700">Urgent</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Job Details Panel */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <h3 className="font-bold text-gray-900">Select a date</h3>
+          </div>
+
+          <div className="p-4 max-h-[500px] overflow-y-auto">
+            {selectedBookings.length > 0 ? (
+              <div className="space-y-4">
+                {selectedBookings.map(booking => (
+                  <div key={booking.id} className={`${booking.color} bg-opacity-10 border-l-4 ${booking.color} rounded-lg p-4`}>
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-bold text-gray-900">{booking.title}</h4>
+                      <span className={`${booking.color} text-white px-2 py-1 rounded text-xs font-medium`}>
+                        {booking.category}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center text-gray-600">
+                        <Clock size={14} className="mr-2" />
+                        <span>{booking.startTime} - {booking.endTime}</span>
+                      </div>
+                      
+                      <div className="flex items-center text-gray-600">
+                        <User size={14} className="mr-2" />
+                        <span>{booking.client}</span>
+                      </div>
+                      
+                      {booking.rate > 0 && (
+                        <div className="flex items-center text-green-600 font-semibold">
+                          <DollarSign size={14} className="mr-2" />
+                          <span>RM {booking.rate}/hr</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <p className="mt-3 text-sm text-gray-700 bg-white bg-opacity-50 p-2 rounded">
+                      {booking.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Calendar size={48} className="mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-500">No bookings for this day</p>
+                <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
+                  Add Booking
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Rest of your components remain unchanged...
+const FreelancerMessages = () => {
+  const [selectedChat, setSelectedChat] = useState(null)
+  const [messageInput, setMessageInput] = useState('')
+  
+  const conversations = [
+    { 
+      id: 1, 
+      client: 'Tech Solutions Sdn Bhd', 
+      lastMessage: 'Thanks! Looking forward to the event',
+      time: '2 mins ago',
+      unread: 0,
+      avatar: '🏢',
+      status: 'active'
+    },
+    { 
+      id: 2, 
+      client: 'Sarah & Ahmad', 
+      lastMessage: 'Can we discuss the wedding package?',
+      time: '1 hour ago',
+      unread: 2,
+      avatar: '💒',
+      status: 'active'
+    },
+    { 
+      id: 3, 
+      client: 'Startup Hub KL', 
+      lastMessage: 'What\'s your rate for product launch?',
+      time: '3 hours ago',
+      unread: 1,
+      avatar: '🚀',
+      status: 'active'
+    }
+  ]
+
+  const messages = selectedChat ? [
+    { id: 1, sender: 'client', text: 'Hi! We need a photographer for our tech event on Oct 15th', time: '10:30 AM' },
+    { id: 2, sender: 'me', text: 'Hi! I would love to help. What are the event details?', time: '10:32 AM' },
+    { id: 3, sender: 'client', text: 'It\'s a corporate tech expo from 2-6pm at Cyberjaya Convention Center', time: '10:35 AM' },
+    { id: 4, sender: 'me', text: 'Perfect! My rate is RM450/hr for corporate events. Total would be RM1,800 for 4 hours', time: '10:37 AM' },
+    { id: 5, sender: 'client', text: 'That works for us! Can you confirm your availability?', time: '10:40 AM' },
+    { id: 6, sender: 'me', text: 'Yes, I\'m available on Oct 15th. I\'ll send over the contract shortly', time: '10:42 AM' },
+    { id: 7, sender: 'client', text: 'Thanks! Looking forward to the event', time: '10:45 AM' }
+  ] : []
+
+  const aiTemplates = [
+    { id: 1, text: 'Thanks for reaching out! I\'d love to work with you. Can you share more details about the event?', icon: '👋' },
+    { id: 2, text: 'I\'m available on that date! My rate for this type of event is [RATE]. Does that work for you?', icon: '✅' },
+    { id: 3, text: 'I appreciate the offer, but unfortunately I\'m not available on that date. Would [DATE] work instead?', icon: '📅' },
+    { id: 4, text: 'I\'ll send over a detailed proposal with deliverables and timeline within 24 hours', icon: '📋' }
+  ]
+
+  const handleSendMessage = () => {
+    if (messageInput.trim()) {
+      console.log('Sending message:', messageInput)
+      setMessageInput('')
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">💬 Messages</h1>
+          <p className="text-gray-600">Communicate with clients and coordinate bookings</p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+            3 unread
+          </span>
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
+          <div className="mb-4">
+            <input 
+              type="text"
+              placeholder="Search conversations..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+          </div>
+
+          <div className="space-y-2">
+            {conversations.map(conv => (
+              <button
+                key={conv.id}
+                onClick={() => setSelectedChat(conv)}
+                className={`w-full p-3 rounded-lg text-left transition-all ${
+                  selectedChat?.id === conv.id 
+                    ? 'bg-blue-50 border-2 border-blue-500' 
+                    : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="text-2xl">{conv.avatar}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold text-gray-900 text-sm truncate">{conv.client}</span>
+                      {conv.unread > 0 && (
+                        <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                          {conv.unread}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-600 truncate">{conv.lastMessage}</p>
+                    <span className="text-xs text-gray-400">{conv.time}</span>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <h4 className="text-sm font-semibold text-green-900 mb-1">Quick Response Rate</h4>
+            <div className="text-2xl font-bold text-green-600">15 min avg</div>
+            <p className="text-xs text-green-700">Keep it under 30min for best results</p>
+          </div>
+        </div>
+
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col" style={{height: '600px'}}>
+          {selectedChat ? (
+            <>
+              <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="text-2xl">{selectedChat.avatar}</div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{selectedChat.client}</h3>
+                    <span className="text-xs text-green-600">● Active now</span>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                    <Paperclip size={18} />
+                  </button>
+                  <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                    <Calendar size={18} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messages.map(msg => (
+                  <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[70%] ${
+                      msg.sender === 'me' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-100 text-gray-900'
+                    } rounded-lg p-3`}>
+                      <p className="text-sm">{msg.text}</p>
+                      <span className={`text-xs ${msg.sender === 'me' ? 'text-blue-100' : 'text-gray-500'} mt-1 block`}>
+                        {msg.time}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
+                <div className="flex items-center space-x-2 overflow-x-auto pb-2">
+                  <span className="text-xs text-gray-600 whitespace-nowrap">Quick replies:</span>
+                  {aiTemplates.map(template => (
+                    <button
+                      key={template.id}
+                      onClick={() => setMessageInput(template.text)}
+                      className="flex items-center space-x-1 px-3 py-1 bg-white border border-gray-300 rounded-full text-xs hover:bg-blue-50 hover:border-blue-300 whitespace-nowrap"
+                    >
+                      <span>{template.icon}</span>
+                      <span className="max-w-[150px] truncate">{template.text.slice(0, 30)}...</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 border-t border-gray-200">
+                <div className="flex items-center space-x-2">
+                  <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                    <Paperclip size={20} />
+                  </button>
+                  <input
+                    type="text"
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    placeholder="Type your message..."
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button 
+                    onClick={handleSendMessage}
+                    className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    <Send size={20} />
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-gray-400">
+              <div className="text-center">
+                <MessageCircle size={64} className="mx-auto mb-4 opacity-50" />
+                <p>Select a conversation to start messaging</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Continue with FreelancerPayments, FreelancerHome, FreelancerGigs, FreelancerProfile, and FreelancerDashboard
+// (All your remaining components stay exactly the same - I'm just including the calendar fix)
+
+const FreelancerPayments = () => {
+  // ... (keep all your existing FreelancerPayments code)
+}
+
+const FreelancerHome = () => {
+  // ... (keep all your existing FreelancerHome code)
+}
+
+const FreelancerGigs = () => {
+  // ... (keep all your existing FreelancerGigs code)
+}
+
+const FreelancerProfile = () => {
+  // ... (keep all your existing FreelancerProfile code)
+}
+
+const FreelancerDashboard = () => {
+  const location = useLocation()
+  
+  const sidebarItems = [
+    { name: 'Dashboard', href: '/freelancer', icon: Home, active: location.pathname === '/freelancer' },
+    { name: 'Smart Bookings', href: '/freelancer/gigs', icon: Bot, active: location.pathname === '/freelancer/gigs' },
+    { name: 'Calendar', href: '/freelancer/calendar', icon: Calendar, active: location.pathname === '/freelancer/calendar' },
+    { name: 'Messages', href: '/freelancer/messages', icon: MessageCircle, active: location.pathname === '/freelancer/messages' },
+    { name: 'Payments', href: '/freelancer/payments', icon: CreditCard, active: location.pathname === '/freelancer/payments' },
+    { name: 'AI Settings', href: '/freelancer/profile', icon: Settings, active: location.pathname === '/freelancer/profile' }
+  ]
+
+  return (
+    <DashboardLayout sidebarItems={sidebarItems} title="Freelancer Dashboard">
+      <Routes>
+        <Route path="/" element={<FreelancerHome />} />
+        <Route path="/gigs" element={<FreelancerGigs />} />
+        <Route path="/calendar" element={<FreelancerCalendar />} />
+        <Route path="/messages" element={<FreelancerMessages />} />
+        <Route path="/payments" element={<FreelancerPayments />} />
+        <Route path="/profile" element={<FreelancerProfile />} />
+      </Routes>
+    </DashboardLayout>
+  )
+}
+
+export default FreelancerDashboard
