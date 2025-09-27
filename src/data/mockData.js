@@ -235,23 +235,72 @@ export const mockDeliveryRoutes = [
   {
     id: 1,
     destination: "Block A, Cyberjaya",
+    address: "Block A, Persiaran APEC, Cyberjaya, Selangor",
+    coordinates: { lat: 2.9213, lng: 101.6369 },
     distance: "2.1 km",
     estimatedTime: "8 mins",
-    priority: "high"
+    priority: "high",
+    orders: 5,
+    customerName: "Tech Corp Office",
+    phoneNumber: "+60 12-345 6789",
+    orderValue: "RM 125.50",
+    specialInstructions: "Leave at reception desk"
   },
   {
     id: 2,
     destination: "Shaftsbury Square",
+    address: "Shaftsbury Square, Cyberjaya, Selangor",
+    coordinates: { lat: 2.9233, lng: 101.6389 },
     distance: "1.8 km",
     estimatedTime: "6 mins",
-    priority: "medium"
+    priority: "medium",
+    orders: 3,
+    customerName: "Sarah Marketing Agency",
+    phoneNumber: "+60 12-987 6543",
+    orderValue: "RM 89.20",
+    specialInstructions: "Ring doorbell, unit 3-15"
   },
   {
     id: 3,
     destination: "MSC Malaysia",
+    address: "MSC Malaysia, Persiaran Multimedia, Cyberjaya",
+    coordinates: { lat: 2.9193, lng: 101.6349 },
     distance: "4.2 km",
     estimatedTime: "12 mins",
-    priority: "low"
+    priority: "low",
+    orders: 2,
+    customerName: "Innovation Hub Cafe",
+    phoneNumber: "+60 12-555 8888",
+    orderValue: "RM 67.80",
+    specialInstructions: "Main entrance, ask for Ahmad"
+  },
+  {
+    id: 4,
+    destination: "MMU Campus",
+    address: "Multimedia University, Persiaran Multimedia, Cyberjaya",
+    coordinates: { lat: 2.9173, lng: 101.6329 },
+    distance: "3.5 km",
+    estimatedTime: "10 mins",
+    priority: "medium",
+    orders: 4,
+    customerName: "Student Council",
+    phoneNumber: "+60 12-777 4444",
+    orderValue: "RM 156.70",
+    specialInstructions: "Faculty building ground floor"
+  },
+  {
+    id: 5,
+    destination: "Cyberjaya Central",
+    address: "Persiaran Cyberpoint Selatan, Cyberjaya",
+    coordinates: { lat: 2.9253, lng: 101.6409 },
+    distance: "2.8 km",
+    estimatedTime: "9 mins",
+    priority: "high",
+    orders: 6,
+    customerName: "Central Mall Food Court",
+    phoneNumber: "+60 12-666 3333",
+    orderValue: "RM 245.90",
+    specialInstructions: "Service entrance, level B1"
   }
 ]
 

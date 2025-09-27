@@ -26,9 +26,11 @@ CyberLink is a comprehensive frontend-only webapp that serves as a Generative AI
   - Text generator for marketing campaigns
   - Poster generator with mock AI-generated designs
 - **Delivery & Logistics**: 
-  - Interactive map with route optimization
-  - Live delivery tracking
-  - Performance metrics
+  - **🗺️ Real Google Maps Integration** with interactive delivery routes
+  - Live delivery tracking with customer information
+  - AI-powered hot spot recommendations
+  - Route optimization with turn-by-turn directions
+  - Performance metrics and ETA calculations
 - **Freelancer Marketplace**: Hire staff for events and operations
 
 ### 🎪 Event Organizer Dashboard
@@ -50,7 +52,9 @@ CyberLink is a comprehensive frontend-only webapp that serves as a Generative AI
 - **Styling**: TailwindCSS with custom design system
 - **Icons**: Lucide React
 - **Charts**: Recharts
+- **Maps**: Google Maps JavaScript API (@googlemaps/js-api-loader)
 - **Build Tool**: Vite
+- **AI Integration**: Google Gemini API (for campaign generation)
 
 ## 🎨 Design System
 
@@ -104,13 +108,31 @@ src/
    npm install
    ```
 
-3. **Start development server**
+3. **Set up API keys (optional)**
+   ```bash
+   cp .env.example .env
+   # Add your Google Maps API key for real map functionality
+   # See GOOGLE_MAPS_SETUP.md for detailed setup instructions
+   ```
+
+4. **Start development server**
    ```bash
    npm run dev
    ```
 
-4. **Open in browser**
+5. **Open in browser**
    Navigate to `http://localhost:5173` (or the port shown in terminal)
+
+## 🗺️ Google Maps Setup
+
+For the **Delivery & Logistics** feature to work with real Google Maps:
+
+1. **Follow the detailed setup guide**: [GOOGLE_MAPS_SETUP.md](./GOOGLE_MAPS_SETUP.md)
+2. **Get a Google Maps API key** from Google Cloud Console
+3. **Add the key to your `.env` file** as `VITE_GOOGLE_MAPS_API_KEY`
+4. **Enable required APIs**: Maps JavaScript API, Directions API
+
+Without the API key, the map will show a helpful error message with setup instructions.
 
 ## 🎮 Demo Features
 

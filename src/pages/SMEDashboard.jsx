@@ -4,6 +4,7 @@ import DashboardLayout from '../components/DashboardLayout'
 import { DemandChart, MetricCard } from '../components/Charts'
 import { FreelancerCard, AlertCard } from '../components/Cards'
 import { mockDemandData, mockAlerts, mockFreelancers, mockCampaigns, mockDeliveryRoutes, mockPostedJobs, mockAppliedFreelancers, mockRecommendedFreelancers, mockEventOpportunities } from '../data/mockData'
+import GoogleDeliveryMap from '../components/Maps/GoogleDeliveryMap'
 import { generateCampaignText, generatePosterImage, generateCampaignVariations } from '../utils/geminiAPI'
 import { 
   Home, 
@@ -56,7 +57,7 @@ const SMEHome = () => {
       <div className="card bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold mb-2 text-gray-900">🤖 AI Insights Dashboard</h2>
+            <h2 className="text-2xl font-bold mb-2 text-gray-900 font-michroma">AI Insights Dashboard</h2>
             <p className="text-gray-700">Real-time predictions based on traffic, weather, events & footfall</p>
           </div>
           <div className="text-right">
@@ -193,7 +194,7 @@ const SMEHome = () => {
               <Zap size={20} className="text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">AI Opportunity Alerts</h2>
+              <h2 className="text-2xl font-bold text-gray-900 font-michroma">AI Opportunity Alerts</h2>
               <p className="text-sm text-gray-600">Powered by AI, GenAI & AgentAI</p>
             </div>
           </div>
@@ -464,7 +465,7 @@ const CampaignStudio = () => {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Campaign Studio</h1>
+        <h1 className="text-3xl font-bold text-gray-900 font-michroma">Campaign Studio</h1>
         <div className="flex space-x-3">
           <button 
             onClick={toggleMockPost}
@@ -500,7 +501,7 @@ const CampaignStudio = () => {
       {showMockPost && (campaignText.trim() || generatedImage) && (
         <div className="card">
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Campaign Preview</h2>
+            <h2 className="text-xl font-bold text-gray-900 font-michroma">Campaign Preview</h2>
           </div>
           
           <div className="grid lg:grid-cols-2 gap-8 items-start">
@@ -604,7 +605,7 @@ const CampaignStudio = () => {
         {/* GenAI Text Generator */}
         <div className="card">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">AI Text Generator</h2>
+            <h2 className="text-xl font-bold text-gray-900 font-michroma">AI Text Generator</h2>
             <div className="flex space-x-2">
               <button 
                 onClick={handleGenerateText}
@@ -626,24 +627,6 @@ const CampaignStudio = () => {
           </div>
           
           {/* GenAI Context Insights */}
-          <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
-            <h3 className="font-medium text-gray-900 mb-3">🧠 GenAI Context Analysis</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-purple-600 font-medium">Current Context:</span>
-                <div className="text-gray-700">• Tech conference nearby</div>
-                <div className="text-gray-700">• Rain expected</div>
-                <div className="text-gray-700">• High office worker traffic</div>
-              </div>
-              <div>
-                <span className="text-pink-600 font-medium">Recommended Tone:</span>
-                <div className="text-gray-700">• Urgency & excitement</div>
-                <div className="text-gray-700">• Weather-aware</div>
-                <div className="text-gray-700">• Professional friendly</div>
-              </div>
-            </div>
-          </div>
-
           <div className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
@@ -781,7 +764,7 @@ const CampaignStudio = () => {
         {/* Poster Generator */}
         <div className="card">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">AI Poster Generator</h2>
+            <h2 className="text-xl font-bold text-gray-900 font-michroma">AI Poster Generator</h2>
             <button 
               onClick={handleGeneratePoster}
               disabled={isGeneratingPoster || !campaignText.trim()}
@@ -898,7 +881,7 @@ const CampaignStudio = () => {
 
       {/* Campaign Performance */}
       <div className="card">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Campaigns</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-6 font-michroma">Recent Campaigns</h2>
         <div className="space-y-4">
           {mockCampaigns.map(campaign => (
             <div key={campaign.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -928,116 +911,297 @@ const CampaignStudio = () => {
 
 const DeliveryLogistics = () => {
   const [selectedRoute, setSelectedRoute] = useState(0)
+  const [optimizing, setOptimizing] = useState(false)
+  const [showHotSpots, setShowHotSpots] = useState(true)
+  const [isOptimized, setIsOptimized] = useState(false)
+
+  // Original routes (before optimization)
+  const originalRoutes = mockDeliveryRoutes
+
+  // Optimized routes (after AI optimization)
+  const optimizedRoutes = [
+    {
+      id: 1,
+      destination: "Block A, Cyberjaya",
+      address: "Block A, Persiaran APEC, Cyberjaya, Selangor",
+      coordinates: { lat: 2.9213, lng: 101.6369 },
+      distance: "1.9 km", // Reduced from 2.1 km
+      estimatedTime: "6 mins", // Reduced from 8 mins
+      priority: "high",
+      orders: 5,
+      customerName: "Tech Corp Office",
+      phoneNumber: "+60 12-345 6789",
+      orderValue: "RM 125.50",
+      specialInstructions: "Leave at reception desk"
+    },
+    {
+      id: 5,
+      destination: "Cyberjaya Central",
+      address: "Persiaran Cyberpoint Selatan, Cyberjaya",
+      coordinates: { lat: 2.9253, lng: 101.6409 },
+      distance: "2.4 km", // Reduced from 2.8 km
+      estimatedTime: "7 mins", // Reduced from 9 mins
+      priority: "high",
+      orders: 6,
+      customerName: "Central Mall Food Court",
+      phoneNumber: "+60 12-666 3333",
+      orderValue: "RM 245.90",
+      specialInstructions: "Service entrance, level B1"
+    },
+    {
+      id: 2,
+      destination: "Shaftsbury Square",
+      address: "Shaftsbury Square, Cyberjaya, Selangor",
+      coordinates: { lat: 2.9233, lng: 101.6389 },
+      distance: "1.5 km", // Reduced from 1.8 km
+      estimatedTime: "5 mins", // Reduced from 6 mins
+      priority: "medium",
+      orders: 3,
+      customerName: "Sarah Marketing Agency",
+      phoneNumber: "+60 12-987 6543",
+      orderValue: "RM 89.20",
+      specialInstructions: "Ring doorbell, unit 3-15"
+    },
+    {
+      id: 4,
+      destination: "MMU Campus",
+      address: "Multimedia University, Persiaran Multimedia, Cyberjaya",
+      coordinates: { lat: 2.9173, lng: 101.6329 },
+      distance: "3.1 km", // Reduced from 3.5 km
+      estimatedTime: "8 mins", // Reduced from 10 mins
+      priority: "medium",
+      orders: 4,
+      customerName: "Student Council",
+      phoneNumber: "+60 12-777 4444",
+      orderValue: "RM 156.70",
+      specialInstructions: "Faculty building ground floor"
+    },
+    {
+      id: 3,
+      destination: "MSC Malaysia",
+      address: "MSC Malaysia, Persiaran Multimedia, Cyberjaya",
+      coordinates: { lat: 2.9193, lng: 101.6349 },
+      distance: "3.8 km", // Reduced from 4.2 km
+      estimatedTime: "10 mins", // Reduced from 12 mins
+      priority: "low",
+      orders: 2,
+      customerName: "Innovation Hub Cafe",
+      phoneNumber: "+60 12-555 8888",
+      orderValue: "RM 67.80",
+      specialInstructions: "Main entrance, ask for Ahmad"
+    }
+  ]
+
+  // Get current routes based on optimization state
+  const currentRoutes = isOptimized ? optimizedRoutes : originalRoutes
+
+  const handleOptimizeRoutes = async () => {
+    setOptimizing(true)
+    // Simulate AI route optimization
+    setTimeout(() => {
+      setOptimizing(false)
+      setIsOptimized(!isOptimized) // Toggle between original and optimized routes
+    }, 2000)
+  }
+
+  const handleRouteSelect = (routeIndex) => {
+    setSelectedRoute(routeIndex)
+  }
 
   return (
-    <div className="space-y-8">
+    <>
+      <style jsx>{`
+        .delivery-scroll::-webkit-scrollbar {
+          width: 6px;
+        }
+        .delivery-scroll::-webkit-scrollbar-track {
+          background: #F9FAFB;
+          border-radius: 3px;
+        }
+        .delivery-scroll::-webkit-scrollbar-thumb {
+          background: #D1D5DB;
+          border-radius: 3px;
+        }
+        .delivery-scroll::-webkit-scrollbar-thumb:hover {
+          background: #9CA3AF;
+        }
+      `}</style>
+      
+      <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Delivery & Logistics</h1>
+        <h1 className="text-3xl font-bold text-gray-900 font-michroma">Delivery & Logistics</h1>
         <div className="flex space-x-3">
-          <button className="btn-outline">
-            <Navigation size={16} className="mr-2" />
-            Optimize Routes
+          <button 
+            onClick={handleOptimizeRoutes}
+            disabled={optimizing}
+            className={`${isOptimized ? 'btn-primary' : 'btn-outline'} flex items-center space-x-2`}
+          >
+            <Navigation size={16} className={optimizing ? "animate-spin" : ""} />
+            <span>
+              {optimizing ? 'Optimizing...' : isOptimized ? 'Reset Routes' : 'Optimize Routes'}
+            </span>
           </button>
-          <button className="btn-primary">
-            <MapPin size={16} className="mr-2" />
-            Find Best Spot
+          <button 
+            onClick={() => setShowHotSpots(!showHotSpots)}
+            className={`${showHotSpots ? 'btn-primary' : 'btn-outline'} flex items-center space-x-2`}
+          >
+            <MapPin size={16} className={showHotSpots ? 'text-white' : 'text-primary-600'} />
+            <span>{showHotSpots ? 'Hide' : 'Show'} AI Hot Spots</span>
           </button>
         </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* AgentAI Map View */}
+        {/* Real Google Maps */}
         <div className="lg:col-span-2 card">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">AgentAI Smart Location Finder</h2>
-              <p className="text-sm text-gray-600">AI analyzes footfall, events, weather & competition</p>
+              <h2 className="text-xl font-bold text-gray-900 font-michroma">Google Maps - Smart Delivery Routes</h2>
+              <p className="text-sm text-gray-600">Real-time navigation with AI-powered optimization</p>
             </div>
             <div className="flex items-center space-x-2">
+              <span className="px-3 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
+                ✅ Google Maps API
+              </span>
               <span className="px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-full font-medium">
-                AgentAI Active
+                🤖 AgentAI Active
               </span>
             </div>
           </div>
-          <div className="bg-gray-100 rounded-lg h-96 flex items-center justify-center relative overflow-hidden">
-            <img 
-              src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&h=400&fit=crop" 
-              alt="Cyberjaya Map"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-primary-500 bg-opacity-10 flex items-center justify-center">
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg mx-auto">
-                  <MapPin size={24} className="text-primary-600" />
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-lg">
-                  <h3 className="font-semibold text-gray-900">Recommended Spot</h3>
-                  <p className="text-sm text-gray-600">Shaftsbury Square</p>
-                  <p className="text-xs text-primary-600 mt-1">High demand area</p>
-                </div>
-              </div>
-            </div>
-            {/* Mock delivery markers */}
-            <div className="absolute top-4 left-4 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-            <div className="absolute top-16 right-8 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-            <div className="absolute bottom-8 left-8 w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
-          </div>
+          
+          <GoogleDeliveryMap 
+            deliveryRoutes={currentRoutes}
+            selectedRoute={selectedRoute}
+            onRouteSelect={handleRouteSelect}
+            showHotSpots={showHotSpots}
+          />
         </div>
 
         {/* Delivery Routes */}
-        <div className="card">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Active Deliveries</h2>
-          <div className="space-y-4">
-            {mockDeliveryRoutes.map((route, index) => (
+        <div className="card" style={{ minHeight: '580px' }}>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900 font-michroma">Active Deliveries</h2>
+            <div className="flex space-x-2">
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
+                {currentRoutes.length} Routes
+              </span>
+              {isOptimized && (
+                <span className="px-3 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
+                  ✅ Optimized
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <div className="space-y-3 overflow-y-auto pr-2 delivery-scroll" style={{
+            maxHeight: '580px',
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#D1D5DB #F9FAFB'
+          }}>
+            {currentRoutes.map((route, index) => (
               <div 
                 key={route.id} 
-                className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                  selectedRoute === index ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-gray-300'
+                className={`border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${
+                  selectedRoute === index ? 'border-blue-500' : 'border-gray-200 hover:border-gray-300'
                 }`}
-                onClick={() => setSelectedRoute(index)}
+                style={selectedRoute === index ? { backgroundColor: '#dafe8c' } : {}}
+                onClick={() => handleRouteSelect(index)}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium text-gray-900">{route.destination}</h3>
-                  <span className={`w-2 h-2 rounded-full ${
-                    route.priority === 'high' ? 'bg-red-500' : 
-                    route.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                  }`}></span>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <h3 className="font-semibold text-gray-900">{route.destination}</h3>
+                    <span className={`w-2 h-2 rounded-full ${
+                      route.priority === 'high' ? 'bg-red-500' : 
+                      route.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                    }`}></span>
+                  </div>
+                  <span className="text-green-600 font-bold text-sm">{route.orderValue}</span>
                 </div>
-                <div className="flex items-center justify-between text-sm text-gray-600">
-                  <span>{route.distance}</span>
-                  <span>{route.estimatedTime}</span>
+                
+                <div className="text-sm text-gray-600 mb-2">
+                  <p className="truncate">{route.customerName}</p>
+                  <p className="text-xs">{route.phoneNumber}</p>
                 </div>
+                
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center space-x-4">
+                    <span className="flex items-center space-x-1">
+                      <Clock className="w-3 h-3" />
+                      <span>{route.estimatedTime}</span>
+                    </span>
+                    <span className="flex items-center space-x-1">
+                      <MapPin className="w-3 h-3" />
+                      <span>{route.distance}</span>
+                    </span>
+                  </div>
+                  <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">
+                    {route.orders} orders
+                  </span>
+                </div>
+                
+                {route.specialInstructions && (
+                  <div className="mt-2 p-2 bg-yellow-50 rounded text-xs text-gray-600">
+                    <strong>Note:</strong> {route.specialInstructions}
+                  </div>
+                )}
               </div>
             ))}
-          </div>
-
-          <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
-            <h3 className="font-medium text-gray-900 mb-3">🤖 AgentAI Route Optimization</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Total Distance</span>
-                <span className="font-medium">8.1 km</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Estimated Time</span>
-                <span className="font-medium">26 mins</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Fuel Savings</span>
-                <span className="font-medium text-green-600">15%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Revenue Potential</span>
-                <span className="font-medium text-purple-600">+RM 180</span>
-              </div>
-            </div>
             
-            <div className="mt-4 pt-4 border-t border-purple-200">
-              <h4 className="font-medium text-gray-900 mb-2">🎯 AgentAI Recommendations</h4>
-              <div className="space-y-1 text-xs">
-                <div className="text-purple-700">• Move to Shaftsbury at 2 PM (200% more footfall)</div>
-                <div className="text-blue-700">• Avoid Federal Highway until 3 PM (traffic jam)</div>
-                <div className="text-green-700">• Stock up on hot drinks (rain forecast)</div>
+            <div className={`mt-6 p-4 rounded-lg border ${
+              isOptimized 
+                ? 'bg-gradient-to-r from-green-50 to-blue-50 border-green-200' 
+                : 'bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200'
+            }`}>
+              <h3 className="font-medium text-gray-900 mb-3">
+                🤖 AgentAI Route Optimization
+                {isOptimized && <span className="ml-2 text-green-600 text-xs">• ACTIVE</span>}
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Total Distance</span>
+                  <span className={`font-medium ${isOptimized ? 'text-green-600' : ''}`}>
+                    {isOptimized ? '6.7 km' : '8.1 km'}
+                    {isOptimized && <span className="ml-1 text-green-500 text-xs">↓17%</span>}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Estimated Time</span>
+                  <span className={`font-medium ${isOptimized ? 'text-green-600' : ''}`}>
+                    {isOptimized ? '21 mins' : '26 mins'}
+                    {isOptimized && <span className="ml-1 text-green-500 text-xs">↓19%</span>}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Fuel Savings</span>
+                  <span className={`font-medium text-green-600`}>
+                    {isOptimized ? '25%' : '15%'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Revenue Potential</span>
+                  <span className={`font-medium text-purple-600`}>
+                    {isOptimized ? '+RM 240' : '+RM 180'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="mt-4 pt-4 border-t border-purple-200">
+                <h4 className="font-medium text-gray-900 mb-2">🎯 AgentAI Recommendations</h4>
+                <div className="space-y-1 text-xs">
+                  {isOptimized ? (
+                    <>
+                      <div className="text-green-700">✅ Optimal route sequence applied</div>
+                      <div className="text-green-700">✅ Traffic congestion avoided</div>
+                      <div className="text-green-700">✅ High-priority orders prioritized</div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-purple-700">• Move to Shaftsbury at 2 PM (200% more footfall)</div>
+                      <div className="text-blue-700">• Avoid Federal Highway until 3 PM (traffic jam)</div>
+                      <div className="text-green-700">• Stock up on hot drinks (rain forecast)</div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -1069,6 +1233,7 @@ const DeliveryLogistics = () => {
         />
       </div>
     </div>
+    </>
   )
 }
 
@@ -1147,7 +1312,7 @@ const Analytics = () => {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Business Analytics</h1>
+        <h1 className="text-3xl font-bold text-gray-900 font-michroma">Business Analytics</h1>
         <div className="flex space-x-3">
           <select 
             value={timeRange}
@@ -1200,7 +1365,7 @@ const Analytics = () => {
       {/* Revenue Trend Chart */}
       <div className="card">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900">Revenue Trends</h2>
+          <h2 className="text-xl font-bold text-gray-900 font-michroma">Revenue Trends</h2>
           <div className="flex space-x-2">
             {['revenue', 'orders', 'customers'].map((metric) => (
               <button
@@ -1249,7 +1414,7 @@ const Analytics = () => {
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Top Products */}
         <div className="card">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Top Performing Products</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-6 font-michroma">Top Performing Products</h2>
           <div className="space-y-4">
             {topProducts.map((product, index) => (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -1273,7 +1438,7 @@ const Analytics = () => {
 
         {/* Customer Segments */}
         <div className="card">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Customer Segments</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-6 font-michroma">Customer Segments</h2>
           <div className="space-y-4">
             {customerSegments.map((segment, index) => (
               <div key={index} className="space-y-2">
@@ -1306,7 +1471,7 @@ const Analytics = () => {
 
       {/* Peak Hours Analysis */}
       <div className="card">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Peak Hours Analysis</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-6 font-michroma">Peak Hours Analysis</h2>
         <div className="grid md:grid-cols-5 gap-4">
           {peakHours.map((hour, index) => (
             <div key={index} className="text-center">
@@ -1423,7 +1588,7 @@ const FreelancerMarketplace = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Freelancer Marketplace</h1>
+          <h1 className="text-3xl font-bold text-gray-900 font-michroma">Freelancer Marketplace</h1>
           <p className="text-gray-600 mt-1">Manage job postings, applications, and hire freelancers</p>
         </div>
         <button 
@@ -1440,7 +1605,7 @@ const FreelancerMarketplace = () => {
         <div className="lg:col-span-1">
           <div className="card">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Your Job Posts</h2>
+              <h2 className="text-xl font-bold text-gray-900 font-michroma">Your Job Posts</h2>
               <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
                 {mockPostedJobs.length} Active
               </span>
@@ -1492,7 +1657,7 @@ const FreelancerMarketplace = () => {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <h2 className="text-2xl font-bold text-gray-900">{selectedJob.title}</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 font-michroma">{selectedJob.title}</h2>
                       <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
                         {selectedJob.status}
                       </span>
@@ -1877,7 +2042,7 @@ const EventOpportunities = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Event Opportunities</h1>
+          <h1 className="text-3xl font-bold text-gray-900 font-michroma">Event Opportunities</h1>
           <p className="text-gray-600 mt-1">Discover and apply for vendor spots at upcoming events</p>
         </div>
         <div className="flex space-x-3">
@@ -1901,7 +2066,7 @@ const EventOpportunities = () => {
               <Zap size={16} className="text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">🤖 AI Recommended for You</h2>
+              <h2 className="text-xl font-bold text-gray-900 font-michroma">🤖 AI Recommended for You</h2>
               <p className="text-sm text-gray-600">Events with highest match potential for your business</p>
             </div>
           </div>
@@ -1936,7 +2101,7 @@ const EventOpportunities = () => {
       {/* Category Filter */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Filter by Category</h2>
+          <h2 className="text-xl font-bold text-gray-900 font-michroma">Filter by Category</h2>
           <span className="text-sm text-gray-600">{sortedEvents.length} events found</span>
         </div>
         <div className="flex items-center space-x-2 overflow-x-auto pb-2">
