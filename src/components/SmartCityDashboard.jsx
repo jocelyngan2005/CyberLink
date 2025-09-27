@@ -1370,7 +1370,7 @@ const SmartCityDashboard = () => {
                     <>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Duration</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-poppins text-base font-medium tracking-wide" style={{ fontFamily: 'Poppins, Michroma, Inter, system-ui, sans-serif' }}>
                           <option value="1">1 Hour</option>
                           <option value="2">2 Hours</option>
                           <option value="4">4 Hours</option>
@@ -1382,7 +1382,8 @@ const SmartCityDashboard = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Number</label>
                         <input 
                           type="text" 
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-poppins text-base font-medium tracking-wide" 
+                          style={{ fontFamily: 'Poppins, Michroma, Inter, system-ui, sans-serif' }}
                           placeholder="ABC 1234"
                         />
                       </div>
@@ -1393,7 +1394,7 @@ const SmartCityDashboard = () => {
                     <>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Departure Time</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-poppins text-base font-medium tracking-wide" style={{ fontFamily: 'Poppins, Michroma, Inter, system-ui, sans-serif' }}>
                           <option value="08:00">08:00 AM</option>
                           <option value="08:15">08:15 AM</option>
                           <option value="08:30">08:30 AM</option>
@@ -1403,7 +1404,7 @@ const SmartCityDashboard = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Number of Passengers</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-poppins text-base font-medium tracking-wide" style={{ fontFamily: 'Poppins, Michroma, Inter, system-ui, sans-serif' }}>
                           <option value="1">1 Passenger</option>
                           <option value="2">2 Passengers</option>
                           <option value="3">3 Passengers</option>
@@ -1417,7 +1418,8 @@ const SmartCityDashboard = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
                     <input 
                       type="tel" 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-poppins text-base font-medium tracking-wide"
+                      style={{ fontFamily: 'Poppins, Michroma, Inter, system-ui, sans-serif' }}
                       placeholder="+60 12-345 6789"
                     />
                   </div>
