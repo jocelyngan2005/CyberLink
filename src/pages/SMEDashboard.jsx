@@ -4,6 +4,7 @@ import DashboardLayout from '../components/DashboardLayout'
 import { DemandChart, MetricCard } from '../components/Charts'
 import { FreelancerCard, AlertCard } from '../components/Cards'
 import { mockDemandData, mockAlerts, mockFreelancers, mockCampaigns, mockDeliveryRoutes } from '../data/mockData'
+import { generateCampaignText, generatePosterImage, generateCampaignVariations } from '../utils/geminiAPI'
 import { 
   Home, 
   TrendingUp, 
@@ -19,7 +20,9 @@ import {
   Image,
   Send,
   Star,
-  Navigation
+  Navigation,
+  Download,
+  Copy
 } from 'lucide-react'
 
 const SMEHome = () => {
@@ -126,16 +129,106 @@ const CampaignStudio = () => {
   const [campaignText, setCampaignText] = useState(selectedCampaign.content)
   const [showPosterGenerator, setShowPosterGenerator] = useState(false)
   const [posterPrompt, setPosterPrompt] = useState("")
+  const [generatedImage, setGeneratedImage] = useState(null)
+  const [imageError, setImageError] = useState(null)
+  const [isGeneratingText, setIsGeneratingText] = useState(false)
+  const [isGeneratingPoster, setIsGeneratingPoster] = useState(false)
+  const [campaignVariations, setCampaignVariations] = useState([])
+  const [showVariations, setShowVariations] = useState(false)
+  
+  // Campaign form fields
+  const [campaignForm, setCampaignForm] = useState({
+    campaignType: 'Product Promotion',
+    targetAudience: 'Tech Professionals',
+    businessName: 'CyberLink Café',
+    productService: 'Premium Coffee Blend',
+    specialOffer: '30% off this week',
+    tone: 'professional'
+  })
+  
+  // Poster form fields
+  const [posterForm, setPosterForm] = useState({
+    style: 'Modern & Clean',
+    colorScheme: 'vibrant'
+  })
 
-  const handleGenerateText = () => {
-    // Mock AI text generation
-    const newContent = "🚀 FLASH SALE ALERT! Get ready for our exclusive Tech Innovation Week deals! Premium coffee blends at 30% off, perfect fuel for coding marathons. Pre-order your favorites and skip the queue. Available until supplies last! #TechWeek #CoffeeLovers #CyberjayadDeals"
-    setCampaignText(newContent)
+  const handleGenerateText = async () => {
+    setIsGeneratingText(true)
+    try {
+      const generatedText = await generateCampaignText({
+        campaignType: campaignForm.campaignType.toLowerCase(),
+        targetAudience: campaignForm.targetAudience.toLowerCase(),
+        businessName: campaignForm.businessName,
+        productService: campaignForm.productService,
+        specialOffer: campaignForm.specialOffer,
+        tone: campaignForm.tone
+      })
+      setCampaignText(generatedText)
+      setShowVariations(false) // Hide variations when generating new text
+      setCampaignVariations([]) // Clear previous variations
+    } catch (error) {
+      console.error('Error generating campaign text:', error)
+      // Fallback to mock generation
+      const fallbackContent = `Error generating campaign text. Please try again later.`
+      setCampaignText(fallbackContent)
+    }
+    setIsGeneratingText(false)
   }
 
-  const handleGeneratePoster = () => {
-    // Mock poster generation
-    setShowPosterGenerator(true)
+  const handleGenerateVariations = async () => {
+    if (!campaignText.trim()) return
+    
+    setIsGeneratingText(true)
+    try {
+      const variations = await generateCampaignVariations(campaignText, 3)
+      setCampaignVariations(variations)
+      setShowVariations(true)
+    } catch (error) {
+      console.error('Error generating variations:', error)
+    }
+    setIsGeneratingText(false)
+  }
+
+  const handleGeneratePoster = async () => {
+    if (!campaignText.trim()) return
+    
+    setIsGeneratingPoster(true)
+    setImageError(null)
+    
+    try {
+      const result = await generatePosterImage({
+        campaignText,
+        style: posterForm.style.toLowerCase().replace(' & ', ' '),
+        businessType: 'food and beverage',
+        colorScheme: posterForm.colorScheme
+      })
+      
+      if (result.success) {
+        setGeneratedImage(result.image)
+        setShowPosterGenerator(true)
+      } else {
+        setImageError(result.error || 'Failed to generate image')
+      }
+    } catch (error) {
+      console.error('Error generating poster image:', error)
+      setImageError('Failed to generate poster image. Please try again.')
+    } finally {
+      setIsGeneratingPoster(false)
+    }
+  }
+
+  const handleFormChange = (field, value) => {
+    setCampaignForm(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handlePosterFormChange = (field, value) => {
+    setPosterForm(prev => ({
+      ...prev,
+      [field]: value
+    }))
   }
 
   return (
@@ -159,33 +252,103 @@ const CampaignStudio = () => {
         <div className="card">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">AI Text Generator</h2>
-            <button 
-              onClick={handleGenerateText}
-              className="btn-primary text-sm"
-            >
-              <Zap size={16} className="mr-2" />
-              Generate
-            </button>
+            <div className="flex space-x-2">
+              <button 
+                onClick={handleGenerateText}
+                disabled={isGeneratingText}
+                className={`btn-primary text-sm ${isGeneratingText ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <Zap size={16} className="mr-2" />
+                {isGeneratingText ? 'Generating...' : 'Generate'}
+              </button>
+              {campaignText && !isGeneratingText && (
+                <button 
+                  onClick={handleGenerateVariations}
+                  className="btn-outline text-sm"
+                >
+                  Create Variations
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Campaign Type</label>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
-                <option>Product Promotion</option>
-                <option>Event Announcement</option>
-                <option>Special Offer</option>
-                <option>Brand Awareness</option>
-              </select>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Campaign Type</label>
+                <select 
+                  value={campaignForm.campaignType}
+                  onChange={(e) => handleFormChange('campaignType', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                >
+                  <option>Product Promotion</option>
+                  <option>Event Announcement</option>
+                  <option>Special Offer</option>
+                  <option>Brand Awareness</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Target Audience</label>
+                <select 
+                  value={campaignForm.targetAudience}
+                  onChange={(e) => handleFormChange('targetAudience', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                >
+                  <option>Tech Professionals</option>
+                  <option>Students</option>
+                  <option>Event Attendees</option>
+                  <option>Local Community</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
+                <input
+                  type="text"
+                  value={campaignForm.businessName}
+                  onChange={(e) => handleFormChange('businessName', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Your business name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Product/Service</label>
+                <input
+                  type="text"
+                  value={campaignForm.productService}
+                  onChange={(e) => handleFormChange('productService', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="What are you promoting?"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Target Audience</label>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
-                <option>Tech Professionals</option>
-                <option>Students</option>
-                <option>Event Attendees</option>
-                <option>Local Community</option>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Special Offer (Optional)</label>
+              <input
+                type="text"
+                value={campaignForm.specialOffer}
+                onChange={(e) => handleFormChange('specialOffer', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                placeholder="e.g., 30% off this week, Buy 1 Get 1 Free"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Tone</label>
+              <select 
+                value={campaignForm.tone}
+                onChange={(e) => handleFormChange('tone', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="professional">Professional</option>
+                <option value="casual">Casual & Friendly</option>
+                <option value="exciting">Exciting & Energetic</option>
+                <option value="formal">Formal</option>
               </select>
             </div>
 
@@ -194,11 +357,41 @@ const CampaignStudio = () => {
               <textarea
                 value={campaignText}
                 onChange={(e) => setCampaignText(e.target.value)}
-                rows={8}
+                rows={6}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 placeholder="AI-generated campaign content will appear here..."
               />
+              <div className="text-right mt-1">
+                <span className={`text-xs ${campaignText.length > 280 ? 'text-red-500' : 'text-gray-500'}`}>
+                  {campaignText.length}/280 characters
+                </span>
+              </div>
             </div>
+
+            {/* Campaign Variations */}
+            {showVariations && campaignVariations.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">A/B Test Variations</h3>
+                <div className="space-y-3">
+                  {campaignVariations.map((variation, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="text-xs text-gray-500 mb-1">Variation {index + 1}</div>
+                          <p className="text-sm text-gray-900">{variation}</p>
+                        </div>
+                        <button
+                          onClick={() => setCampaignText(variation)}
+                          className="ml-3 px-2 py-1 text-xs bg-primary-100 text-primary-700 rounded hover:bg-primary-200"
+                        >
+                          Use This
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div>
@@ -219,17 +412,24 @@ const CampaignStudio = () => {
             <h2 className="text-xl font-bold text-gray-900">AI Poster Generator</h2>
             <button 
               onClick={handleGeneratePoster}
-              className="btn-secondary text-sm"
+              disabled={isGeneratingPoster || !campaignText.trim()}
+              className={`btn-secondary text-sm ${
+                isGeneratingPoster || !campaignText.trim() ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <Image size={16} className="mr-2" />
-              Generate
+              {isGeneratingPoster ? 'Generating...' : 'Generate'}
             </button>
           </div>
 
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Design Style</label>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+              <select 
+                value={posterForm.style}
+                onChange={(e) => handlePosterFormChange('style', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              >
                 <option>Modern & Clean</option>
                 <option>Bold & Colorful</option>
                 <option>Minimalist</option>
@@ -238,29 +438,72 @@ const CampaignStudio = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Poster Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Color Scheme</label>
+              <select 
+                value={posterForm.colorScheme}
+                onChange={(e) => handlePosterFormChange('colorScheme', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="vibrant">Vibrant</option>
+                <option value="monochrome">Monochrome</option>
+                <option value="pastel">Pastel</option>
+                <option value="corporate">Corporate</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Custom Description (Optional)</label>
               <textarea
                 value={posterPrompt}
                 onChange={(e) => setPosterPrompt(e.target.value)}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                placeholder="Describe what you want in your poster..."
+                placeholder="Add specific elements you want in your poster..."
               />
             </div>
 
-            {/* Mock Generated Poster */}
+            {/* Error Display */}
+            {imageError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-900">{imageError}</p>
+              </div>
+            )}
+
+            {/* Generated Poster Display */}
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-              {showPosterGenerator ? (
+              {showPosterGenerator && generatedImage ? (
                 <div className="space-y-4">
                   <img 
-                    src="https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=600&fit=crop" 
-                    alt="Generated Poster"
-                    className="w-full h-64 object-cover rounded-lg"
+                    src={generatedImage}
+                    alt="AI-Generated Poster"
+                    className="w-full max-h-96 object-contain rounded-lg shadow-lg"
                   />
-                  <p className="text-sm text-gray-600">AI-Generated Tech Expo Poster</p>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-gray-900">AI-Generated Poster</p>
+                    <p className="text-xs text-gray-600">Right-click to save or copy the image</p>
+                  </div>
                   <div className="flex space-x-2">
-                    <button className="flex-1 btn-outline text-sm">Edit</button>
-                    <button className="flex-1 btn-primary text-sm">Download</button>
+                    <button 
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = generatedImage;
+                        link.download = 'campaign-poster.png';
+                        link.click();
+                      }}
+                      className="flex-1 btn-outline text-sm"
+                    >
+                      <Download size={16} className="mr-2" />
+                      Download Image
+                    </button>
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(generatedImage);
+                      }}
+                      className="flex-1 btn-primary text-sm"
+                    >
+                      <Copy size={16} className="mr-2" />
+                      Copy Image URL
+                    </button>
                   </div>
                 </div>
               ) : (
@@ -268,7 +511,12 @@ const CampaignStudio = () => {
                   <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center mx-auto">
                     <Image size={24} className="text-gray-400" />
                   </div>
-                  <p className="text-gray-500">Generated poster will appear here</p>
+                  <div className="space-y-2">
+                    <p className="text-gray-500">AI-generated poster will appear here</p>
+                    <p className="text-xs text-gray-400">
+                      {!campaignText.trim() ? 'Generate campaign text first' : 'Click Generate to create poster image'}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
