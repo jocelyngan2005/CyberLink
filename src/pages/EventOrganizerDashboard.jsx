@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import DashboardLayout from '../components/DashboardLayout'
 import PosterGeneration from './PosterGeneration'
 import VendorMatchingDashboard from '../components/VendorMatchingDashboard'
+import SmartCityDashboard from '../components/SmartCityDashboard'
 import { RippleEffectChart, MetricCard, TrafficChart } from '../components/Charts'
 import { SMECard } from '../components/Cards'
 import { mockSMEs, mockRippleEffects, mockEvents } from '../data/mockData'
@@ -22,7 +23,8 @@ import {
   Clock,
   Filter,
   Search,
-  Plus
+  Plus,
+  Shield
 } from 'lucide-react'
 
 const EventOrganizerHome = () => {
@@ -159,14 +161,45 @@ const EventOrganizerHome = () => {
 const SmartCityIntegration = () => {
   const [selectedLayer, setSelectedLayer] = useState('all')
   const [timeFilter, setTimeFilter] = useState('current')
+  const [parkingData, setParkingData] = useState([])
+  const [shuttleData, setShuttleData] = useState([])
+  const [crowdData, setCrowdData] = useState([])
+  const [loading, setLoading] = useState(false)
 
   const cityLayers = [
     { id: 'all', name: 'All Layers', color: 'primary' },
     { id: 'parking', name: 'Parking', color: 'blue' },
     { id: 'transport', name: 'Public Transport', color: 'green' },
-    { id: 'sanitation', name: 'Sanitation', color: 'orange' },
+    { id: 'crowd', name: 'Crowd Management', color: 'orange' },
     { id: 'security', name: 'Security', color: 'red' }
   ]
+
+  // Load city data when component mounts
+  useEffect(() => {
+    loadCityData()
+  }, [])
+
+  const loadCityData = async () => {
+    setLoading(true)
+    try {
+      // Import cityAPI dynamically to avoid circular dependencies
+      const { default: cityAPI } = await import('../utils/cityAPI')
+      
+      const [parking, shuttles, crowd] = await Promise.all([
+        cityAPI.getParkingLots(),
+        cityAPI.getShuttleRoutes(),
+        cityAPI.getCrowdDensity()
+      ])
+      
+      setParkingData(parking.lots || [])
+      setShuttleData(shuttles.routes || [])
+      setCrowdData(crowd.areas || [])
+    } catch (error) {
+      console.error('Error loading city data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -270,31 +303,62 @@ const SmartCityIntegration = () => {
         <div className="space-y-6">
           <div className="card">
             <h3 className="font-semibold text-gray-900 mb-4">Infrastructure Status</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Car size={18} className="text-blue-600" />
-                  <span className="text-sm font-medium">Parking</span>
-                </div>
-                <span className="text-sm text-yellow-600 font-medium">65% Occupied</span>
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-2 text-gray-600">Loading city data...</span>
               </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Bus size={18} className="text-green-600" />
-                  <span className="text-sm font-medium">Public Transport</span>
+            ) : (
+              <div className="space-y-4">
+                {/* Parking Status */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Car size={18} className="text-blue-600" />
+                    <span className="text-sm font-medium">Parking</span>
+                  </div>
+                  <span className={`text-sm font-medium ${
+                    parkingData.length > 0 && parkingData.some(p => p.availableSlots > 50) ? 'text-green-600' :
+                    parkingData.length > 0 && parkingData.some(p => p.availableSlots > 20) ? 'text-yellow-600' : 'text-red-600'
+                  }`}>
+                    {parkingData.length > 0 ? 
+                      `${parkingData.reduce((sum, p) => sum + p.availableSlots, 0)} slots available` : 
+                      'Loading...'
+                    }
+                  </span>
                 </div>
-                <span className="text-sm text-green-600 font-medium">On Schedule</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Trash2 size={18} className="text-orange-600" />
-                  <span className="text-sm font-medium">Sanitation</span>
+                
+                {/* Shuttle Status */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Bus size={18} className="text-green-600" />
+                    <span className="text-sm font-medium">Shuttle Services</span>
+                  </div>
+                  <span className="text-sm text-green-600 font-medium">
+                    {shuttleData.length > 0 ? 
+                      `${shuttleData.length} routes active` : 
+                      'Loading...'
+                    }
+                  </span>
                 </div>
-                <span className="text-sm text-green-600 font-medium">All Clear</span>
+                
+                {/* Crowd Management Status */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Users size={18} className="text-orange-600" />
+                    <span className="text-sm font-medium">Crowd Management</span>
+                  </div>
+                  <span className={`text-sm font-medium ${
+                    crowdData.length > 0 && crowdData.every(c => c.densityLevel < 70) ? 'text-green-600' :
+                    crowdData.length > 0 && crowdData.some(c => c.densityLevel >= 70) ? 'text-yellow-600' : 'text-red-600'
+                  }`}>
+                    {crowdData.length > 0 ? 
+                      `${crowdData.filter(c => c.densityLevel > 70).length} areas congested` : 
+                      'Loading...'
+                    }
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="card">
@@ -329,6 +393,29 @@ const SmartCityIntegration = () => {
                   <div className="bg-green-500 h-2 rounded-full" style={{width: '100%'}}></div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="card">
+            <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <button className="flex flex-col items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                <Car className="w-6 h-6 text-blue-600 mb-2" />
+                <span className="text-sm font-medium text-blue-900">Book Parking</span>
+              </button>
+              <button className="flex flex-col items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                <Bus className="w-6 h-6 text-green-600 mb-2" />
+                <span className="text-sm font-medium text-green-900">Shuttle Info</span>
+              </button>
+              <button className="flex flex-col items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
+                <Users className="w-6 h-6 text-orange-600 mb-2" />
+                <span className="text-sm font-medium text-orange-900">Crowd Alert</span>
+              </button>
+              <button className="flex flex-col items-center p-4 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                <Shield className="w-6 h-6 text-red-600 mb-2" />
+                <span className="text-sm font-medium text-red-900">Emergency</span>
+              </button>
             </div>
           </div>
 
@@ -733,7 +820,7 @@ const EventOrganizerDashboard = () => {
       <Routes>
         <Route path="/" element={<EventOrganizerHome />} />
         <Route path="/events" element={<EventDemandPlanning />} />
-        <Route path="/smart-city" element={<SmartCityIntegration />} />
+        <Route path="/smart-city" element={<SmartCityDashboard />} />
         <Route path="/ripple-effects" element={<RippleEffectDashboard />} />
         <Route path="/vendors" element={<VendorMatchingDashboard />} />
       </Routes>
