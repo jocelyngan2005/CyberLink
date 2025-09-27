@@ -722,7 +722,7 @@ const SmartCityDashboard = () => {
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center shadow-lg border border-blue-200">
                   <BarChart3 className="w-7 h-7 text-blue-600" />
                 </div>
-                <p className="text-xl text-gray-600 font-medium">Real-time city services and infrastructure management</p>
+                <p className="text-2xl text-gray-600 font-bold">Real-time city services and infrastructure management</p>
               </div>
               <div>
                 <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">

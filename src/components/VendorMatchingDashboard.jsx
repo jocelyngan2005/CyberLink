@@ -20,6 +20,7 @@ import {
   ThumbsDown,
   MessageSquare,
   ArrowRight,
+  ArrowLeft,
   Target,
   TrendingUp,
   Award,
@@ -185,10 +186,7 @@ const VendorMatchingDashboard = ({ isOpen, onClose, eventData }) => {
                   <p className="text-xl text-gray-600 mt-2 max-w-2xl">Select a vendor to start generating AI-powered marketing materials and managing vendor partnerships</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">John Doe</p>
-                <p className="text-xs text-gray-500">Event Organizer</p>
-              </div>
+              
             </div>
           </div>
 
@@ -199,8 +197,7 @@ const VendorMatchingDashboard = ({ isOpen, onClose, eventData }) => {
                 {mockVendors.map(vendor => (
                   <div 
                     key={vendor.id}
-                    onClick={() => setSelectedEvent(vendor)}
-                    className="group cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+                    className="group transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
                   >
                     <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 flex flex-col" style={{ height: '500px' }}>
                       <div className="relative h-48 w-full overflow-hidden flex-shrink-0">
@@ -229,11 +226,8 @@ const VendorMatchingDashboard = ({ isOpen, onClose, eventData }) => {
                           </div>
                         </div>
                         <button 
-                          className="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg flex items-center justify-center transition-colors duration-200"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleVendorSelection(vendor);
-                          }}
+                          className="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg flex items-center justify-center transition-colors duration-200 cursor-pointer"
+                          onClick={() => handleVendorSelection(vendor)}
                         >
                           Select Vendor <ArrowRight className="w-4 h-4 ml-2" />
                         </button>
@@ -270,7 +264,7 @@ const VendorMatchingDashboard = ({ isOpen, onClose, eventData }) => {
                   onClick={handleBackToSelection}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <ArrowRight className="w-5 h-5 rotate-180 text-gray-600" />
+                  <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
                 {isModalMode && onClose && (
                   <button 
@@ -281,7 +275,7 @@ const VendorMatchingDashboard = ({ isOpen, onClose, eventData }) => {
                   </button>
                 )}
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Vendor Selected Successfully! 🎉</h1>
+                  <h1 className="text-2xl font-bold text-gray-900">Contact Vendorted Successfully! 🎉</h1>
                   <p className="text-gray-600">Your vendor has been confirmed for the event</p>
                 </div>
               </div>
@@ -390,19 +384,11 @@ const VendorMatchingDashboard = ({ isOpen, onClose, eventData }) => {
                   onClick={() => {
                     alert('Proceeding to contract and payment setup...');
                   }}
-                  className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Proceed with Booking
                 </button>
-                <button
-                  onClick={() => {
-                    alert(`Contacting ${confirmedVendor.name}...`);
-                  }}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <MessageCircle className="w-4 h-4 mr-2 inline" />
-                  Contact Vendor
-                </button>
+                
               </div>
             </div>
           </div>
