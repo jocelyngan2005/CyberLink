@@ -255,6 +255,284 @@ export const mockDeliveryRoutes = [
   }
 ]
 
+export const mockPostedJobs = [
+  {
+    id: 1,
+    title: "Event Photographer",
+    category: "Photography",
+    description: "Professional photographer needed for Tech Innovation Expo. Must have experience with event photography and own equipment.",
+    location: "Cyberjaya Convention Center",
+    date: "2025-10-15",
+    duration: "8 hours",
+    hourlyRate: 150,
+    status: "Active",
+    postedDate: "5 days ago",
+    applicationsCount: 8,
+    requirements: ["Professional camera equipment", "Event photography experience", "Portfolio required"]
+  },
+  {
+    id: 2,
+    title: "Event Cashier",
+    category: "Customer Service",
+    description: "Experienced cashier needed to handle transactions during busy food festival period.",
+    location: "Shaftsbury Square",
+    date: "2025-10-20",
+    duration: "6 hours", 
+    hourlyRate: 25,
+    status: "Active",
+    postedDate: "3 days ago",
+    applicationsCount: 12,
+    requirements: ["Cash handling experience", "POS system knowledge", "Customer service skills"]
+  },
+  {
+    id: 3,
+    title: "Food Delivery Rider",
+    category: "Delivery",
+    description: "Reliable delivery rider needed for peak hours during street food festival.",
+    location: "Cyberjaya Area",
+    date: "2025-10-20",
+    duration: "4 hours",
+    hourlyRate: 22,
+    status: "Active", 
+    postedDate: "2 days ago",
+    applicationsCount: 6,
+    requirements: ["Own motorcycle", "Valid license", "GPS navigation skills"]
+  },
+  {
+    id: 4,
+    title: "Social Media Manager",
+    category: "Marketing",
+    description: "Part-time social media manager to create content and manage online presence during events.",
+    location: "Remote/On-site",
+    date: "2025-10-25",
+    duration: "Flexible",
+    hourlyRate: 35,
+    status: "Active",
+    postedDate: "1 day ago",
+    applicationsCount: 4,
+    requirements: ["Social media experience", "Content creation skills", "GenAI tool proficiency"]
+  },
+  {
+    id: 5,
+    title: "Event Setup Crew",
+    category: "Labor",
+    description: "Physical labor needed for setting up event booths and equipment.",
+    location: "Various venues",
+    date: "2025-10-15",
+    duration: "6 hours",
+    hourlyRate: 20,
+    status: "Active",
+    postedDate: "4 days ago", 
+    applicationsCount: 15,
+    requirements: ["Physical fitness", "Teamwork", "Punctuality"]
+  }
+]
+
+export const mockAppliedFreelancers = [
+  // Applications for Event Photographer (Job ID: 1)
+  {
+    id: 101,
+    name: "David Tan",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
+    rating: 4.6,
+    skills: ["Event Photography", "Content Creation", "Photo Editing"],
+    hourlyRate: 130,
+    availability: "Available",
+    completedJobs: 85,
+    jobAppliedFor: "Event Photographer",
+    jobId: 1,
+    applicationDate: "2 days ago",
+    applicationStatus: "pending",
+    portfolio: ["Wedding Photography", "Corporate Events", "Product Shoots", "Tech Conferences"],
+    experience: "3 years",
+    aiMatchScore: 95,
+    coverLetter: "Experienced in tech event photography with professional equipment and editing skills."
+  },
+  {
+    id: 102,
+    name: "Jenny Liu",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b5c0?w=150",
+    rating: 4.8,
+    skills: ["Photography", "Videography", "Drone Operation"],
+    hourlyRate: 180,
+    availability: "Available",
+    completedJobs: 127,
+    jobAppliedFor: "Event Photographer", 
+    jobId: 1,
+    applicationDate: "1 day ago",
+    applicationStatus: "pending",
+    portfolio: ["Event Photography", "Corporate Videos", "Aerial Photography", "Live Streaming"],
+    experience: "5 years",
+    aiMatchScore: 98,
+    coverLetter: "Professional photographer with drone capabilities and live streaming experience."
+  },
+  // Applications for Event Cashier (Job ID: 2)
+  {
+    id: 103,
+    name: "Maria Santos",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+    rating: 4.9,
+    skills: ["Cashier", "Customer Service", "POS Systems"],
+    hourlyRate: 25,
+    availability: "Available",
+    completedJobs: 156,
+    jobAppliedFor: "Event Cashier",
+    jobId: 2,
+    applicationDate: "1 day ago",
+    applicationStatus: "pending",
+    portfolio: ["Retail Experience", "Event Management", "Cash Handling", "Multilingual Support"],
+    experience: "5 years",
+    aiMatchScore: 92,
+    coverLetter: "Experienced cashier with multilingual capabilities and event experience."
+  },
+  {
+    id: 104,
+    name: "Rahman Ali",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+    rating: 4.7,
+    skills: ["Customer Service", "Cash Management", "Problem Solving"],
+    hourlyRate: 23,
+    availability: "Available",
+    completedJobs: 89,
+    jobAppliedFor: "Event Cashier",
+    jobId: 2,
+    applicationDate: "4 hours ago",
+    applicationStatus: "pending",
+    portfolio: ["Fast Food Service", "Event Cashier", "Customer Relations"],
+    experience: "2 years",
+    aiMatchScore: 88,
+    coverLetter: "Quick learner with excellent customer service skills and cash handling experience."
+  },
+  // Applications for Food Delivery Rider (Job ID: 3) 
+  {
+    id: 105,
+    name: "Kevin Lim",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150",
+    rating: 4.7,
+    skills: ["Delivery", "Customer Relations", "Route Optimization"],
+    hourlyRate: 22,
+    availability: "Available",
+    completedJobs: 234,
+    jobAppliedFor: "Food Delivery Rider",
+    jobId: 3,
+    applicationDate: "3 hours ago",
+    applicationStatus: "pending", 
+    portfolio: ["Food Delivery", "Package Delivery", "Express Services"],
+    experience: "4 years",
+    aiMatchScore: 91,
+    coverLetter: "Experienced delivery rider with excellent knowledge of Cyberjaya area."
+  },
+  // Applications for Social Media Manager (Job ID: 4)
+  {
+    id: 106,
+    name: "Sarah Chen",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150",
+    rating: 4.8,
+    skills: ["Social Media Marketing", "Content Creation", "GenAI Tools"],
+    hourlyRate: 40,
+    availability: "Available",
+    completedJobs: 67,
+    jobAppliedFor: "Social Media Manager",
+    jobId: 4,
+    applicationDate: "6 hours ago",
+    applicationStatus: "pending",
+    portfolio: ["Brand Management", "Content Strategy", "AI-Generated Content", "Analytics"],
+    experience: "3 years",
+    aiMatchScore: 96,
+    coverLetter: "Specialized in GenAI content creation and social media strategy for tech companies."
+  },
+  // Applications for Event Setup Crew (Job ID: 5)
+  {
+    id: 107,
+    name: "Ahmad Hassan",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+    rating: 4.5,
+    skills: ["Manual Labor", "Equipment Setup", "Team Coordination"],
+    hourlyRate: 18,
+    availability: "Available",
+    completedJobs: 145,
+    jobAppliedFor: "Event Setup Crew",
+    jobId: 5,
+    applicationDate: "1 day ago",
+    applicationStatus: "pending",
+    portfolio: ["Event Setup", "Construction", "Equipment Installation"],
+    experience: "6 years",
+    aiMatchScore: 87,
+    coverLetter: "Experienced in event setup with strong physical capabilities and teamwork skills."
+  }
+]
+
+export const mockRecommendedFreelancers = [
+  // Recommendations for Event Photographer (Job ID: 1)
+  {
+    id: 201,
+    name: "Alex Wong",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", 
+    rating: 4.9,
+    skills: ["Photography", "Video Production", "Live Streaming"],
+    hourlyRate: 160,
+    availability: "Available",
+    completedJobs: 198,
+    recommendedFor: "Event Photographer",
+    jobId: 1,
+    aiMatchScore: 97,
+    matchReasons: ["Specialized in tech events", "Professional equipment", "Available on required date"],
+    portfolio: ["Tech Conferences", "Product Launches", "Corporate Events"],
+    experience: "7 years"
+  },
+  // Recommendations for Event Cashier (Job ID: 2)
+  {
+    id: 202,
+    name: "Lisa Tan",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b5c0?w=150",
+    rating: 4.6,
+    skills: ["Customer Service", "POS Systems", "Cash Handling"],
+    hourlyRate: 26,
+    availability: "Available",
+    completedJobs: 112,
+    recommendedFor: "Event Cashier",
+    jobId: 2,
+    aiMatchScore: 94,
+    matchReasons: ["Perfect location match", "Available exact dates", "High customer satisfaction"],
+    portfolio: ["Event Cashier", "Retail Management", "Customer Support"],
+    experience: "4 years"
+  },
+  // Recommendations for Food Delivery Rider (Job ID: 3)
+  {
+    id: 203,
+    name: "Danny Ng",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150",
+    rating: 4.8,
+    skills: ["Delivery Services", "Navigation", "Customer Service"],
+    hourlyRate: 24,
+    availability: "Available", 
+    completedJobs: 289,
+    recommendedFor: "Food Delivery Rider",
+    jobId: 3,
+    aiMatchScore: 93,
+    matchReasons: ["Local area expert", "High delivery success rate", "Peak hours available"],
+    portfolio: ["Food Delivery", "Same-day Delivery", "Event Services"],
+    experience: "5 years"
+  },
+  // Recommendations for Social Media Manager (Job ID: 4)
+  {
+    id: 204,
+    name: "Michelle Lee",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150",
+    rating: 4.7,
+    skills: ["Digital Marketing", "GenAI Content", "Analytics"],
+    hourlyRate: 42,
+    availability: "Available",
+    completedJobs: 78,
+    recommendedFor: "Social Media Manager", 
+    jobId: 4,
+    aiMatchScore: 95,
+    matchReasons: ["GenAI expertise", "Tech industry experience", "Analytics proficiency"],
+    portfolio: ["Social Media Strategy", "AI Content Creation", "Brand Management"],
+    experience: "3 years"
+  }
+]
+
 export const mockCampaigns = [
   {
     id: 1,

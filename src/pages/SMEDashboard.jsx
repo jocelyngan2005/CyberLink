@@ -3,7 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import DashboardLayout from '../components/DashboardLayout'
 import { DemandChart, MetricCard } from '../components/Charts'
 import { FreelancerCard, AlertCard } from '../components/Cards'
-import { mockDemandData, mockAlerts, mockFreelancers, mockCampaigns, mockDeliveryRoutes } from '../data/mockData'
+import { mockDemandData, mockAlerts, mockFreelancers, mockCampaigns, mockDeliveryRoutes, mockPostedJobs, mockAppliedFreelancers, mockRecommendedFreelancers } from '../data/mockData'
 import { generateCampaignText, generatePosterImage, generateCampaignVariations } from '../utils/geminiAPI'
 import { 
   Home, 
@@ -22,7 +22,9 @@ import {
   Star,
   Navigation,
   Download,
-  Copy
+  Copy,
+  Cloud,
+  Calendar
 } from 'lucide-react'
 
 const SMEHome = () => {
@@ -36,29 +38,29 @@ const SMEHome = () => {
   return (
     <div className="space-y-8">
       {/* AI-Powered Insights Banner */}
-      <div className="card bg-gradient-to-r from-primary-500 to-secondary-500 text-white">
+      <div className="card bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold mb-2">🤖 AI Insights Dashboard</h2>
-            <p className="text-primary-100">Real-time predictions based on traffic, weather, events & footfall</p>
+            <h2 className="text-2xl font-bold mb-2 text-gray-900">🤖 AI Insights Dashboard</h2>
+            <p className="text-gray-700">Real-time predictions based on traffic, weather, events & footfall</p>
           </div>
           <div className="text-right">
-            <div className="text-3xl font-bold">{aiInsights.predictedCustomers}</div>
-            <div className="text-primary-100">Predicted customers today</div>
+            <div className="text-3xl font-bold text-gray-900">{aiInsights.predictedCustomers}</div>
+            <div className="text-gray-600">Predicted customers today</div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-primary-400">
+        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-blue-200">
           <div className="text-center">
-            <div className="text-lg font-semibold">{aiInsights.weatherImpact}</div>
-            <div className="text-primary-100 text-sm">Weather Impact</div>
+            <div className="text-lg font-semibold text-gray-900">{aiInsights.weatherImpact}</div>
+            <div className="text-gray-600 text-sm">Weather Impact</div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-semibold">{aiInsights.eventBoost}</div>
-            <div className="text-primary-100 text-sm">Event Boost</div>
+            <div className="text-lg font-semibold text-gray-900">{aiInsights.eventBoost}</div>
+            <div className="text-gray-600 text-sm">Event Boost</div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-semibold">{aiInsights.trafficLevel}</div>
-            <div className="text-primary-100 text-sm">Traffic Level</div>
+            <div className="text-lg font-semibold text-gray-900">{aiInsights.trafficLevel}</div>
+            <div className="text-gray-600 text-sm">Traffic Level</div>
           </div>
         </div>
       </div>
@@ -1198,183 +1200,355 @@ const Analytics = () => {
 }
 
 const FreelancerMarketplace = () => {
-  const [selectedFreelancer, setSelectedFreelancer] = useState(null)
+  const [selectedJob, setSelectedJob] = useState(null)
   const [showJobPostModal, setShowJobPostModal] = useState(false)
+  const [activeTab, setActiveTab] = useState('applications') // applications or recommendations
+
+  // Get applications and recommendations for selected job
+  const getApplicationsForJob = (jobId) => {
+    return mockAppliedFreelancers.filter(freelancer => freelancer.jobId === jobId)
+  }
+
+  const getRecommendationsForJob = (jobId) => {
+    return mockRecommendedFreelancers.filter(freelancer => freelancer.jobId === jobId)
+  }
+
+  const handleJobSelect = (job) => {
+    setSelectedJob(job)
+    setActiveTab('applications')
+  }
+
+  const handleAcceptApplication = (freelancerId) => {
+    // Handle accepting application
+    console.log('Accepting application from freelancer:', freelancerId)
+  }
+
+  const handleHireRecommended = (freelancerId) => {
+    // Handle hiring recommended freelancer
+    console.log('Hiring recommended freelancer:', freelancerId)
+  }
 
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Freelancer Marketplace</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Freelancer Marketplace</h1>
+          <p className="text-gray-600 mt-1">Manage job postings, applications, and hire freelancers</p>
+        </div>
         <button 
           onClick={() => setShowJobPostModal(true)}
           className="btn-primary"
         >
           <Users size={16} className="mr-2" />
-          Post a Job
+          Post New Job
         </button>
       </div>
 
-      {/* AI Job Recommendations */}
-      <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-lg p-6 border border-green-200 mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">🎯 AI Job Recommendations</h2>
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg p-4 border border-green-200">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h4 className="font-medium text-gray-900">Event Photography</h4>
-                <p className="text-sm text-gray-600">Wedding season peak</p>
-              </div>
-              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Hot</span>
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Posted Jobs Sidebar */}
+        <div className="lg:col-span-1">
+          <div className="card">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Your Job Posts</h2>
+              <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                {mockPostedJobs.length} Active
+              </span>
             </div>
-            <div className="space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Rate:</span>
-                <span className="font-medium">RM 200/day</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Match:</span>
-                <span className="font-medium text-green-600">98%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Distance:</span>
-                <span className="font-medium">2.1 km</span>
-              </div>
-            </div>
-            <button className="w-full mt-3 bg-green-600 text-white text-sm py-2 rounded-lg hover:bg-green-700">
-              Apply Now
-            </button>
-          </div>
-          
-          <div className="bg-white rounded-lg p-4 border border-blue-200">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h4 className="font-medium text-gray-900">Social Media Content</h4>
-                <p className="text-sm text-gray-600">Remote work available</p>
-              </div>
-              <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Remote</span>
-            </div>
-            <div className="space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Rate:</span>
-                <span className="font-medium">RM 50/post</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Match:</span>
-                <span className="font-medium text-blue-600">92%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Skills:</span>
-                <span className="font-medium">GenAI, Design</span>
-              </div>
-            </div>
-            <button className="w-full mt-3 bg-blue-600 text-white text-sm py-2 rounded-lg hover:bg-blue-700">
-              Apply Now
-            </button>
-          </div>
-          
-          <div className="bg-white rounded-lg p-4 border border-purple-200">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h4 className="font-medium text-gray-900">Customer Service</h4>
-                <p className="text-sm text-gray-600">AI-assisted support</p>
-              </div>
-              <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">AI+</span>
-            </div>
-            <div className="space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Rate:</span>
-                <span className="font-medium">RM 18/hour</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Match:</span>
-                <span className="font-medium text-purple-600">89%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Training:</span>
-                <span className="font-medium">Provided</span>
-              </div>
-            </div>
-            <button className="w-full mt-3 bg-purple-600 text-white text-sm py-2 rounded-lg hover:bg-purple-700">
-              Apply Now
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Available Freelancers */}
-      <div className="card">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">🤖 AI-Matched Freelancers</h2>
-        <div className="space-y-4">
-          {mockFreelancers.map((freelancer, index) => (
-            <div key={freelancer.id} className="border border-gray-200 rounded-lg">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold">
-                      {freelancer.name.charAt(0)}
+            
+            <div className="space-y-3">
+              {mockPostedJobs.map((job) => (
+                <div 
+                  key={job.id}
+                  onClick={() => handleJobSelect(job)}
+                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    selectedJob?.id === job.id 
+                      ? 'border-primary-500 bg-primary-50' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-gray-900 text-sm">{job.title}</h3>
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                      {job.status}
+                    </span>
+                  </div>
+                  <div className="space-y-1 text-xs text-gray-600">
+                    <div className="flex items-center justify-between">
+                      <span>📍 {job.location}</span>
+                      <span>💰 RM {job.hourlyRate}/hr</span>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{freelancer.name}</h3>
-                      <p className="text-sm text-gray-600">{freelancer.skills.join(", ")}</p>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <div className="flex text-yellow-400">
-                          {"★".repeat(Math.floor(freelancer.rating))}
-                        </div>
-                        <span className="text-sm text-gray-600">({freelancer.rating})</span>
-                        <span className="text-sm text-gray-500">• {freelancer.completedJobs} jobs</span>
-                      </div>
+                    <div className="flex items-center justify-between">
+                      <span>📅 {job.date}</span>
+                      <span>🕒 {job.duration}</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <span className="font-medium text-primary-600">{job.applicationsCount} Applications</span>
+                      <span className="text-gray-500">{job.postedDate}</span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-gray-900">RM {freelancer.hourlyRate}/hr</div>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        index % 3 === 0 ? 'bg-green-100 text-green-800' :
-                        index % 3 === 1 ? 'bg-blue-100 text-blue-800' :
-                        'bg-purple-100 text-purple-800'
-                      }`}>
-                        {index % 3 === 0 ? 'AI Match: 95%' :
-                         index % 3 === 1 ? 'GenAI Skills' :
-                         'AgentAI Ready'}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="lg:col-span-2">
+          {selectedJob ? (
+            <div className="space-y-6">
+              {/* Job Details Header */}
+              <div className="card">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <h2 className="text-2xl font-bold text-gray-900">{selectedJob.title}</h2>
+                      <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                        {selectedJob.status}
                       </span>
+                    </div>
+                    <p className="text-gray-600 mb-4">{selectedJob.description}</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-500">Location:</span>
+                        <div className="font-medium">{selectedJob.location}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Rate:</span>
+                        <div className="font-medium">RM {selectedJob.hourlyRate}/hr</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Duration:</span>
+                        <div className="font-medium">{selectedJob.duration}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Date:</span>
+                        <div className="font-medium">{selectedJob.date}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
                 
-                {/* AI-powered insights */}
-                <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                  <h4 className="font-medium text-gray-900 mb-2">🎯 AI Insights</h4>
-                  <div className="text-sm space-y-1">
-                    {index % 3 === 0 && (
-                      <>
-                        <div className="text-green-700">• Perfect match for your event photography needs</div>
-                        <div className="text-blue-700">• Available this weekend during peak demand</div>
-                        <div className="text-gray-700">• Located 2.3km from your venue</div>
-                      </>
-                    )}
-                    {index % 3 === 1 && (
-                      <>
-                        <div className="text-blue-700">• Expert in GenAI content creation tools</div>
-                        <div className="text-green-700">• 15% faster delivery than average</div>
-                        <div className="text-gray-700">• Specialized in your industry</div>
-                      </>
-                    )}
-                    {index % 3 === 2 && (
-                      <>
-                        <div className="text-purple-700">• AgentAI certified for customer support</div>
-                        <div className="text-green-700">• Multilingual capabilities (EN, MS, CN)</div>
-                        <div className="text-gray-700">• Night shift availability</div>
-                      </>
+                <div className="flex space-x-2 pt-4 border-t">
+                  <button
+                    onClick={() => setActiveTab('applications')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      activeTab === 'applications'
+                        ? 'bg-primary-500 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    Applications ({getApplicationsForJob(selectedJob.id).length})
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('recommendations')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      activeTab === 'recommendations'
+                        ? 'bg-primary-500 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    AI Recommendations ({getRecommendationsForJob(selectedJob.id).length})
+                  </button>
+                </div>
+              </div>
+
+              {/* Applications Tab */}
+              {activeTab === 'applications' && (
+                <div className="card">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-gray-900">Job Applications</h3>
+                    <span className="text-sm text-gray-600">
+                      {getApplicationsForJob(selectedJob.id).length} freelancers applied
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {getApplicationsForJob(selectedJob.id).length > 0 ? (
+                      getApplicationsForJob(selectedJob.id).map((freelancer) => (
+                        <div key={freelancer.id} className="border border-gray-200 rounded-lg p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-start space-x-4">
+                              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                                {freelancer.name.charAt(0)}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-3 mb-2">
+                                  <h4 className="font-semibold text-gray-900">{freelancer.name}</h4>
+                                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                    Applied {freelancer.applicationDate}
+                                  </span>
+                                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                    {freelancer.aiMatchScore}% AI Match
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-600 mb-2">{freelancer.skills.join(", ")}</p>
+                                <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
+                                  <div className="flex text-yellow-400">
+                                    {"★".repeat(Math.floor(freelancer.rating))}
+                                  </div>
+                                  <span>({freelancer.rating})</span>
+                                  <span>• {freelancer.completedJobs} jobs</span>
+                                  <span>• {freelancer.experience} experience</span>
+                                </div>
+                                <p className="text-sm text-gray-700 italic">"{freelancer.coverLetter}"</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-gray-900">RM {freelancer.hourlyRate}/hr</div>
+                              <span className="text-xs text-green-600 font-medium">{freelancer.availability}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                            <h5 className="font-medium text-gray-900 mb-2">💼 Portfolio</h5>
+                            <div className="flex flex-wrap gap-2">
+                              {freelancer.portfolio.map((item, index) => (
+                                <span key={index} className="text-xs bg-white px-2 py-1 rounded border border-gray-200 text-gray-700">
+                                  {item}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="flex space-x-3">
+                            <button 
+                              onClick={() => handleAcceptApplication(freelancer.id)}
+                              className="btn-primary text-sm flex-1"
+                            >
+                              Accept Application
+                            </button>
+                            <button className="btn-outline text-sm flex-1">
+                              View Resume
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Users size={24} className="text-gray-400" />
+                        </div>
+                        <p className="text-gray-500">No applications yet for this position</p>
+                        <p className="text-sm text-gray-400 mt-1">Applications will appear here as freelancers apply</p>
+                      </div>
                     )}
                   </div>
                 </div>
+              )}
 
-                <button className="btn-primary text-sm w-full">
-                  Hire {freelancer.name}
-                </button>
-              </div>
+              {/* Recommendations Tab */}
+              {activeTab === 'recommendations' && (
+                <div className="card">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                        <Zap size={16} className="text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900">AI Recommendations</h3>
+                        <p className="text-sm text-gray-600">Freelancers perfectly matched for your job</p>
+                      </div>
+                    </div>
+                    <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full font-medium">
+                      Powered by AI
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {getRecommendationsForJob(selectedJob.id).length > 0 ? (
+                      getRecommendationsForJob(selectedJob.id).map((freelancer) => (
+                        <div key={freelancer.id} className="border border-purple-200 rounded-lg p-6 bg-purple-50">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-start space-x-4">
+                              <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                                {freelancer.name.charAt(0)}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-3 mb-2">
+                                  <h4 className="font-semibold text-gray-900">{freelancer.name}</h4>
+                                  <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full font-medium">
+                                    {freelancer.aiMatchScore}% AI Match
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-600 mb-2">{freelancer.skills.join(", ")}</p>
+                                <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
+                                  <div className="flex text-yellow-400">
+                                    {"★".repeat(Math.floor(freelancer.rating))}
+                                  </div>
+                                  <span>({freelancer.rating})</span>
+                                  <span>• {freelancer.completedJobs} jobs</span>
+                                  <span>• {freelancer.experience} experience</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-gray-900">RM {freelancer.hourlyRate}/hr</div>
+                              <span className="text-xs text-green-600 font-medium">{freelancer.availability}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-white rounded-lg p-3 mb-4">
+                            <h5 className="font-medium text-gray-900 mb-2">🎯 Why This Match?</h5>
+                            <div className="space-y-1">
+                              {freelancer.matchReasons.map((reason, index) => (
+                                <div key={index} className="flex items-center space-x-2 text-sm">
+                                  <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
+                                  <span className="text-gray-700">{reason}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div className="bg-white rounded-lg p-3 mb-4">
+                            <h5 className="font-medium text-gray-900 mb-2">💼 Relevant Portfolio</h5>
+                            <div className="flex flex-wrap gap-2">
+                              {freelancer.portfolio.map((item, index) => (
+                                <span key={index} className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded border border-purple-200">
+                                  {item}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="flex space-x-3">
+                            <button 
+                              onClick={() => handleHireRecommended(freelancer.id)}
+                              className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-1"
+                            >
+                              Send Invite
+                            </button>
+                            <button className="btn-outline text-sm flex-1">
+                              View Resume
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 bg-purple-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Zap size={24} className="text-purple-400" />
+                        </div>
+                        <p className="text-gray-500">AI is analyzing freelancers for this position</p>
+                        <p className="text-sm text-gray-400 mt-1">Recommendations will appear here shortly</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          ))}
+          ) : (
+            // No job selected state
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Users size={32} className="text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Select a Job Position</h3>
+              <p className="text-gray-600 mb-6">
+                Choose a job from the sidebar to view applications and AI recommendations
+              </p>
+              
+            </div>
+          )}
         </div>
       </div>
 
@@ -1382,7 +1556,7 @@ const FreelancerMarketplace = () => {
       {showJobPostModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Post a Job</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Post a New Job</h3>
             
             <div className="space-y-4">
               <div>
@@ -1397,10 +1571,12 @@ const FreelancerMarketplace = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Job Category</label>
                 <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
-                  <option>Event Staff</option>
+                  <option>Customer Service</option>
                   <option>Delivery</option>
                   <option>Marketing</option>
                   <option>Photography</option>
+                  <option>Labor</option>
+                  <option>Technical</option>
                 </select>
               </div>
               
@@ -1423,10 +1599,10 @@ const FreelancerMarketplace = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Duration (hours)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
                   <input 
-                    type="number" 
-                    placeholder="8"
+                    type="text" 
+                    placeholder="8 hours"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
@@ -1437,6 +1613,14 @@ const FreelancerMarketplace = () => {
                 <input 
                   type="text" 
                   placeholder="e.g. Cyberjaya Convention Center"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date Needed</label>
+                <input 
+                  type="date" 
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 />
               </div>
