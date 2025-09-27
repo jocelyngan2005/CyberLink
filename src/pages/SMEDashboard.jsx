@@ -19,6 +19,7 @@ import {
   Edit3,
   Image,
   Send,
+  Eye,
   Star,
   Navigation,
   Download,
@@ -311,6 +312,8 @@ const CampaignStudio = () => {
   const [isGeneratingPoster, setIsGeneratingPoster] = useState(false)
   const [campaignVariations, setCampaignVariations] = useState([])
   const [showVariations, setShowVariations] = useState(false)
+  const [showMockPost, setShowMockPost] = useState(false)
+  const [isPublishing, setIsPublishing] = useState(false)
   
   // Campaign form fields
   const [campaignForm, setCampaignForm] = useState({
@@ -342,6 +345,10 @@ const CampaignStudio = () => {
       setCampaignText(generatedText)
       setShowVariations(false) // Hide variations when generating new text
       setCampaignVariations([]) // Clear previous variations
+      // Auto-show mock post when text is generated
+      if (generatedText.trim()) {
+        setShowMockPost(true)
+      }
     } catch (error) {
       console.error('Error generating campaign text:', error)
       // Fallback to mock generation
@@ -382,6 +389,8 @@ const CampaignStudio = () => {
       if (result.success) {
         setGeneratedImage(result.image)
         setShowPosterGenerator(true)
+        // Auto-show mock post when image is generated
+        setShowMockPost(true)
       } else {
         setImageError(result.error || 'Failed to generate image')
       }
@@ -407,21 +416,189 @@ const CampaignStudio = () => {
     }))
   }
 
+  const handlePublishCampaign = async () => {
+    if (!campaignText.trim()) return
+    
+    setIsPublishing(true)
+    
+    // Simulate publishing process
+    setTimeout(() => {
+      // Clear all form data and states
+      setCampaignText("")
+      setGeneratedImage(null)
+      setShowPosterGenerator(false)
+      setShowMockPost(false)
+      setImageError(null)
+      setCampaignVariations([])
+      setShowVariations(false)
+      setPosterPrompt("")
+      
+      // Reset form to defaults
+      setCampaignForm({
+        campaignType: 'Product Promotion',
+        targetAudience: 'Tech Professionals',
+        businessName: 'CyberLink Café',
+        productService: 'Premium Coffee Blend',
+        specialOffer: '30% off this week',
+        tone: 'professional'
+      })
+      
+      setPosterForm({
+        style: 'Modern & Clean',
+        colorScheme: 'vibrant'
+      })
+      
+      setIsPublishing(false)
+      
+      // Show success notification (you could implement a proper notification system)
+      alert('Campaign published successfully!')
+    }, 2000)
+  }
+
+  const toggleMockPost = () => {
+    if (campaignText.trim() || generatedImage) {
+      setShowMockPost(!showMockPost)
+    }
+  }
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900">Campaign Studio</h1>
         <div className="flex space-x-3">
-          <button className="btn-outline">
-            <Edit3 size={16} className="mr-2" />
-            Templates
+          <button 
+            onClick={toggleMockPost}
+            disabled={!campaignText.trim() && !generatedImage}
+            className={`px-4 py-2 rounded-lg font-medium text-sm border inline-flex items-center ${
+              !campaignText.trim() && !generatedImage 
+                ? 'bg-gray-300 text-gray-500 border-gray-300 opacity-60 cursor-not-allowed'
+                : 'btn-secondary'
+            }`}
+          >
+            <Eye size={16} className="mr-2" />
+            {!campaignText.trim() && !generatedImage 
+              ? 'No Preview' 
+              : showMockPost ? 'Hide Preview' : 'Preview Post'
+            }
           </button>
-          <button className="btn-primary">
+          <button 
+            onClick={handlePublishCampaign}
+            disabled={isPublishing || (!campaignText.trim() && !generatedImage)}
+            className={`btn-primary ${
+              isPublishing || (!campaignText.trim() && !generatedImage) 
+                ? 'opacity-50 cursor-not-allowed' 
+                : ''
+            }`}
+          >
             <Send size={16} className="mr-2" />
-            Publish Campaign
+            {isPublishing ? 'Publishing...' : 'Publish Campaign'}
           </button>
         </div>
       </div>
+
+      {/* Campaign Preview Section */}
+      {showMockPost && (campaignText.trim() || generatedImage) && (
+        <div className="card">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Campaign Preview</h2>
+          </div>
+          
+          <div className="grid lg:grid-cols-2 gap-8 items-start">
+            {/* Left Side - Generated Poster */}
+            <div className="space-y-4">
+              {generatedImage ? (
+                <div className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                  <img 
+                    src={generatedImage} 
+                    alt="Generated Campaign Poster" 
+                    className="w-full h-auto object-contain max-h-96"
+                  />
+                </div>
+              ) : (
+                <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl h-64 flex items-center justify-center">
+                  <div className="text-center">
+                    <Image size={32} className="text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">No poster generated yet</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right Side - Campaign Details */}
+            <div className="space-y-6">
+              {/* Business Info */}
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center mr-4">
+                    <span className="text-white font-bold">CL</span>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-lg">{campaignForm.businessName}</h3>
+                    <p className="text-sm text-gray-600">Campaign Preview</p>
+                  </div>
+                </div>
+
+                {campaignText && (
+                  <div className="mb-4">
+                    <h4 className="font-semibold text-gray-900 mb-2">Campaign Message</h4>
+                    <p className="text-gray-700 leading-relaxed bg-white rounded-lg p-4 border">
+                      {campaignText}
+                    </p>
+                    <div className="text-right mt-1">
+                      <span className={`text-xs ${campaignText.length > 280 ? 'text-red-500' : 'text-gray-500'}`}>
+                        {campaignText.length} characters
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Campaign Details Grid */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-white rounded-lg p-3 border">
+                    <div className="text-xs text-purple-600 font-medium mb-1">CAMPAIGN TYPE</div>
+                    <div className="text-gray-900 font-semibold">{campaignForm.campaignType}</div>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg p-3 border">
+                    <div className="text-xs text-blue-600 font-medium mb-1">TARGET AUDIENCE</div>
+                    <div className="text-gray-900 font-semibold">{campaignForm.targetAudience}</div>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg p-3 border">
+                    <div className="text-xs text-green-600 font-medium mb-1">PRODUCT/SERVICE</div>
+                    <div className="text-gray-900 font-semibold">{campaignForm.productService}</div>
+                  </div>
+                  
+                  {campaignForm.specialOffer && (
+                    <div className="bg-white rounded-lg p-3 border">
+                      <div className="text-xs text-orange-600 font-medium mb-1">SPECIAL OFFER</div>
+                      <div className="text-gray-900 font-semibold">{campaignForm.specialOffer}</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Campaign Stats */}
+                <div className="mt-4 pt-4 border-t border-blue-200">
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <div className="text-lg font-bold text-primary-600">2,500+</div>
+                      <div className="text-xs text-gray-600">Est. Reach</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold text-green-600">94.2%</div>
+                      <div className="text-xs text-gray-600">AI Confidence</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold text-purple-600">{campaignForm.tone}</div>
+                      <div className="text-xs text-gray-600">Tone</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-2 gap-8">
         {/* GenAI Text Generator */}
