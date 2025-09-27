@@ -375,8 +375,6 @@ const MapboxCityMap = ({ selectedLayer, timeFilter }) => {
       return
     }
 
-    mapboxgl.accessToken = token
-
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/light-v11',
@@ -1083,7 +1081,7 @@ const SmartCityDashboard = () => {
                     </div>
 
                     <button 
-                      className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105"
+                     className="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 text-black py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:via-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl mt-auto"
                       onClick={() => {
                         setSelectedService(route);
                         setShowBookingModal(true);
