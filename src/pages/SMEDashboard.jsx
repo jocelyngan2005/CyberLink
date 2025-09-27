@@ -1893,68 +1893,6 @@ const EventOpportunities = () => {
         </div>
       </div>
 
-      {/* Statistics Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="card">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-              <Calendar size={20} className="text-primary-600" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">
-                {mockEventOpportunities.filter(e => e.status === 'Open').length}
-              </div>
-              <div className="text-sm text-gray-600">Open Applications</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center">
-              <Zap size={20} className="text-secondary-600" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">
-                {mockEventOpportunities.filter(e => e.aiRecommended).length}
-              </div>
-              <div className="text-sm text-gray-600">AI Recommended</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-              <AlertCircle size={20} className="text-red-600" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">
-                {mockEventOpportunities.filter(e => e.urgency === 'high').length}
-              </div>
-              <div className="text-sm text-gray-600">Urgent Applications</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center">
-              <DollarSign size={20} className="text-success-600" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">
-                RM {mockEventOpportunities.reduce((sum, e) => {
-                  const max = parseInt(e.revenueEstimate.split(' - RM ')[1]?.replace(/,/g, '') || '0')
-                  return sum + max
-                }, 0).toLocaleString()}
-              </div>
-              <div className="text-sm text-gray-600">Total Revenue Potential</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* AI Recommendations */}
       {mockEventOpportunities.filter(e => e.aiRecommended).length > 0 && (
         <div className="card">
