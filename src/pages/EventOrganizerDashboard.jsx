@@ -1,35 +1,536 @@
-import React, { useState, useEffect } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
-import DashboardLayout from '../components/DashboardLayout'
-import PosterGeneration from './PosterGeneration'
-import VendorMatchingDashboard from '../components/VendorMatchingDashboard'
-import SmartCityDashboard from '../components/SmartCityDashboard'
-import { RippleEffectChart, MetricCard, TrafficChart } from '../components/Charts'
-import { SMECard } from '../components/Cards'
-import { mockSMEs, mockRippleEffects, mockEvents } from '../data/mockData'
+// Campaign Studio for Event Organizer (mimics SME CampaignStudio)
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import DashboardLayout from '../components/DashboardLayout';
+import PosterGeneration from './PosterGeneration';
+import VendorMatchingDashboard from '../components/VendorMatchingDashboard';
+import SmartCityDashboard from '../components/SmartCityDashboard';
+import { RippleEffectChart, MetricCard, TrafficChart } from '../components/Charts';
+import { SMECard } from '../components/Cards';
+import { mockSMEs, mockRippleEffects, mockEvents } from '../data/mockData';
 import { 
-  Home, 
-  Calendar, 
-  Users, 
-  MapPin, 
-  BarChart3,
-  Zap,
-  Car,
-  Bus,
-  Trash2,
-  Building,
-  TrendingUp,
-  Star,
-  Clock,
-  Filter,
-  Search,
-  Plus,
-  Shield
-} from 'lucide-react'
+  Eye, Send, Image, Download, Copy, Zap, TrendingUp, Truck, Star, Clock, Megaphone, MapPin, Users,
+  Home, Calendar, BarChart3, Car, Bus, Trash2, Building, Filter, Search, Plus, Shield
+} from 'lucide-react';
+import PosterDropzone from '../components/PosterDropzone';
+
+const mockCampaigns = [
+  {
+    id: 1,
+    title: 'Tech Expo Promo',
+    content: 'Join us for exclusive tech deals and networking!',
+    reach: '2,500+',
+    engagement: '1,200',
+    platform: 'Instagram'
+  },
+  // ...add more mock campaigns as needed
+];
+
+const EventOrganizerCampaignStudio = () => {
+  const [selectedCampaign, setSelectedCampaign] = useState(mockCampaigns[0]);
+  const [campaignText, setCampaignText] = useState(selectedCampaign.content);
+  const [showPosterGenerator, setShowPosterGenerator] = useState(false);
+  const [posterPrompt, setPosterPrompt] = useState("");
+  const [generatedImage, setGeneratedImage] = useState(null);
+  const [imageError, setImageError] = useState(null);
+  const [isGeneratingText, setIsGeneratingText] = useState(false);
+  const [isGeneratingPoster, setIsGeneratingPoster] = useState(false);
+  const [campaignVariations, setCampaignVariations] = useState([]);
+  const [showVariations, setShowVariations] = useState(false);
+  const [showMockPost, setShowMockPost] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+
+  // Campaign form fields
+  const [campaignForm, setCampaignForm] = useState({
+    campaignType: 'Product Promotion',
+    targetAudience: 'Tech Professionals',
+    businessName: 'Tech Innovation Expo 2025',
+    productService: 'Technology Conference',
+    specialOffer: '30% for early bird tickets',
+    tone: 'professional'
+  });
+
+  // Poster form fields
+  const [posterForm, setPosterForm] = useState({
+    style: 'Modern & Clean',
+    colorScheme: 'vibrant'
+  });
+
+  const handleGenerateText = async () => {
+    setIsGeneratingText(true);
+    setTimeout(() => {
+      setCampaignText(
+        'Join us for the Tech Innovation Expo 2025! Discover the latest in technology, network with industry leaders, and take advantage of our special offer: 30% off early bird tickets. Don’t miss out on this exciting event!'
+      );
+      setIsGeneratingText(false);
+    }, 1200);
+  };
+
+  const handleGenerateVariations = async () => {
+    setShowVariations(true);
+    setCampaignVariations([
+      'Variation 1: Don’t miss out on our tech event!',
+      'Variation 2: Special offers for attendees!',
+    ]);
+  };
+
+  const handleGeneratePoster = async () => {
+    setIsGeneratingPoster(true);
+    setTimeout(() => {
+      setGeneratedImage('https://via.placeholder.com/400x600?text=Event+Poster');
+      setShowPosterGenerator(true);
+      setIsGeneratingPoster(false);
+    }, 1200);
+  };
+
+  const handleFormChange = (field, value) => {
+    setCampaignForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePosterFormChange = (field, value) => {
+    setPosterForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePublishCampaign = async () => {
+    setIsPublishing(true);
+    setTimeout(() => {
+      setIsPublishing(false);
+      alert('Campaign published!');
+    }, 1200);
+  };
+
+  const toggleMockPost = () => {
+    setShowMockPost(prev => !prev);
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-gray-900">Marketing Studio</h1>
+        <div className="flex space-x-3">
+          <button 
+            onClick={toggleMockPost}
+            disabled={!campaignText.trim() && !generatedImage}
+            className={`px-4 py-2 rounded-lg font-medium text-sm border inline-flex items-center ${
+              !campaignText.trim() && !generatedImage 
+                ? 'bg-gray-300 text-gray-500 border-gray-300 opacity-60 cursor-not-allowed'
+                : 'btn-secondary'
+            }`}
+          >
+            <Eye size={16} className="mr-2" />
+            {!campaignText.trim() && !generatedImage 
+              ? 'No Preview' 
+              : showMockPost ? 'Hide Preview' : 'Preview Post'
+            }
+          </button>
+          <button 
+            onClick={handlePublishCampaign}
+            disabled={isPublishing || (!campaignText.trim() && !generatedImage)}
+            className={`btn-primary ${
+              isPublishing || (!campaignText.trim() && !generatedImage) 
+                ? 'opacity-50 cursor-not-allowed' 
+                : ''
+            }`}
+          >
+            <Send size={16} className="mr-2" />
+            {isPublishing ? 'Publishing...' : 'Publish Campaign'}
+          </button>
+        </div>
+      </div>
+
+      {showMockPost && (campaignText.trim() || generatedImage) && (
+        <div className="card">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Campaign Preview</h2>
+          </div>
+          <div className="grid lg:grid-cols-2 gap-8 items-start">
+            <div className="space-y-4">
+              {generatedImage ? (
+                <div className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                  <img 
+                    src={generatedImage} 
+                    alt="Generated Campaign Poster" 
+                    className="w-full h-auto object-contain max-h-96"
+                  />
+                </div>
+              ) : (
+                <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl h-64 flex items-center justify-center">
+                  <div className="text-center">
+                    <Image size={32} className="text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">No poster generated yet</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center mr-4">
+                    <span className="text-white font-bold">CL</span>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-lg">{campaignForm.businessName}</h3>
+                    <p className="text-sm text-gray-600">Campaign Preview</p>
+                  </div>
+                </div>
+                {campaignText && (
+                  <div className="mb-4">
+                    <h4 className="font-semibold text-gray-900 mb-2">Campaign Message</h4>
+                    <p className="text-gray-700 leading-relaxed bg-white rounded-lg p-4 border">
+                      {campaignText}
+                    </p>
+                    <div className="text-right mt-1">
+                      <span className={`text-xs ${campaignText.length > 280 ? 'text-red-500' : 'text-gray-500'}`}>
+                        {campaignText.length} characters
+                      </span>
+                    </div>
+                  </div>
+                )}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-white rounded-lg p-3 border">
+                    <div className="text-xs text-purple-600 font-medium mb-1">CAMPAIGN TYPE</div>
+                    <div className="text-gray-900 font-semibold">{campaignForm.campaignType}</div>
+                  </div>
+                  <div className="bg-white rounded-lg p-3 border">
+                    <div className="text-xs text-blue-600 font-medium mb-1">TARGET AUDIENCE</div>
+                    <div className="text-gray-900 font-semibold">{campaignForm.targetAudience}</div>
+                  </div>
+                  <div className="bg-white rounded-lg p-3 border">
+                    <div className="text-xs text-green-600 font-medium mb-1">Category</div>
+                    <div className="text-gray-900 font-semibold">{campaignForm.productService}</div>
+                  </div>
+                  {campaignForm.specialOffer && (
+                    <div className="bg-white rounded-lg p-3 border">
+                      <div className="text-xs text-orange-600 font-medium mb-1">SPECIAL OFFER</div>
+                      <div className="text-gray-900 font-semibold">{campaignForm.specialOffer}</div>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-4 pt-4 border-t border-blue-200">
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <div className="text-lg font-bold text-primary-600">2,500+</div>
+                      <div className="text-xs text-gray-600">Est. Reach</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold text-green-600">94.2%</div>
+                      <div className="text-xs text-gray-600">AI Confidence</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold text-purple-600">{campaignForm.tone}</div>
+                      <div className="text-xs text-gray-600">Tone</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="grid lg:grid-cols-2 gap-8">
+        <div className="card">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">AI Text Generator</h2>
+            <div className="flex space-x-2">
+              <button 
+                onClick={handleGenerateText}
+                disabled={isGeneratingText}
+                className={`btn-primary text-sm ${isGeneratingText ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <Zap size={16} className="mr-2" />
+                {isGeneratingText ? 'Generating...' : 'Generate'}
+              </button>
+              {campaignText && !isGeneratingText && (
+                <button 
+                  onClick={handleGenerateVariations}
+                  className="btn-outline text-sm"
+                >
+                  Create Variations
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+            <h3 className="font-medium text-gray-900 mb-3">🧠 GenAI Context Analysis</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-purple-600 font-medium">Current Context:</span>
+                <div className="text-gray-700">• Tech conference nearby</div>
+                <div className="text-gray-700">• Rain expected</div>
+                <div className="text-gray-700">• High office worker traffic</div>
+              </div>
+              <div>
+                <span className="text-pink-600 font-medium">Recommended Tone:</span>
+                <div className="text-gray-700">• Urgency & excitement</div>
+                <div className="text-gray-700">• Weather-aware</div>
+                <div className="text-gray-700">• Professional friendly</div>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Campaign Type</label>
+                <select 
+                  value={campaignForm.campaignType}
+                  onChange={(e) => handleFormChange('campaignType', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                >
+                  <option>Product Promotion</option>
+                  <option>Event Announcement</option>
+                  <option>Special Offer</option>
+                  <option>Brand Awareness</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Target Audience</label>
+                <select 
+                  value={campaignForm.targetAudience}
+                  onChange={(e) => handleFormChange('targetAudience', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                >
+                  <option>Tech Professionals</option>
+                  <option>Students</option>
+                  <option>Event Attendees</option>
+                  <option>Local Community</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Event Name</label>
+                <input
+                  type="text"
+                  value={campaignForm.businessName}
+                  onChange={(e) => handleFormChange('businessName', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Your business name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <input
+                  type="text"
+                  value={campaignForm.productService}
+                  onChange={(e) => handleFormChange('productService', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="What are you promoting?"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Special Offer (Optional)</label>
+              <input
+                type="text"
+                value={campaignForm.specialOffer}
+                onChange={(e) => handleFormChange('specialOffer', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                placeholder="e.g., 30% off this week, Buy 1 Get 1 Free"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Tone</label>
+              <select 
+                value={campaignForm.tone}
+                onChange={(e) => handleFormChange('tone', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="professional">Professional</option>
+                <option value="casual">Casual & Friendly</option>
+                <option value="exciting">Exciting & Energetic</option>
+                <option value="formal">Formal</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Generated Content</label>
+              <textarea
+                value={campaignText}
+                onChange={(e) => setCampaignText(e.target.value)}
+                rows={6}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                placeholder="AI-generated campaign content will appear here..."
+              />
+              <div className="text-right mt-1">
+                <span className={`text-xs ${campaignText.length > 280 ? 'text-red-500' : 'text-gray-500'}`}>
+                  {campaignText.length}/280 characters
+                </span>
+              </div>
+            </div>
+            {showVariations && campaignVariations.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">A/B Test Variations</h3>
+                <div className="space-y-3">
+                  {campaignVariations.map((variation, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="text-xs text-gray-500 mb-1">Variation {index + 1}</div>
+                          <p className="text-sm text-gray-900">{variation}</p>
+                        </div>
+                        <button
+                          onClick={() => setCampaignText(variation)}
+                          className="ml-3 px-2 py-1 text-xs bg-primary-100 text-primary-700 rounded hover:bg-primary-200"
+                        >
+                          Use This
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div>
+                <div className="font-medium text-gray-900">Estimated Reach</div>
+                <div className="text-sm text-gray-600">Based on your audience</div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-primary-600">2,500+</div>
+                <div className="text-sm text-gray-600">people</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="card">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">AI Poster Generator</h2>
+            <button 
+              onClick={handleGeneratePoster}
+              disabled={isGeneratingPoster || !campaignText.trim()}
+              className={`btn-secondary text-sm ${
+                isGeneratingPoster || !campaignText.trim() ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              <Image size={16} className="mr-2" />
+              {isGeneratingPoster ? 'Generating...' : 'Generate'}
+            </button>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Design Style</label>
+              <select 
+                value={posterForm.style}
+                onChange={(e) => handlePosterFormChange('style', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              >
+                <option>Modern & Clean</option>
+                <option>Bold & Colorful</option>
+                <option>Minimalist</option>
+                <option>Tech-Inspired</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Color Scheme</label>
+              <select 
+                value={posterForm.colorScheme}
+                onChange={(e) => handlePosterFormChange('colorScheme', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="vibrant">Vibrant</option>
+                <option value="monochrome">Monochrome</option>
+                <option value="pastel">Pastel</option>
+                <option value="corporate">Corporate</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Custom Description (Optional)</label>
+              <textarea
+                value={posterPrompt}
+                onChange={(e) => setPosterPrompt(e.target.value)}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                placeholder="Add specific elements you want in your poster..."
+              />
+            </div>
+            {imageError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-900">{imageError}</p>
+              </div>
+            )}
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                {showPosterGenerator && generatedImage ? (
+                  <div className="space-y-4">
+                    <img 
+                      src={generatedImage}
+                      alt="AI-Generated Poster"
+                      className="w-full max-h-96 object-contain rounded-lg shadow-lg"
+                    />
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-gray-900">AI-Generated Poster</p>
+                      <p className="text-xs text-gray-600">Right-click to save or copy the image</p>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button 
+                        onClick={() => {}}
+                        className="flex-1 btn-outline text-sm"
+                      >
+                        <Download size={16} className="mr-2" />
+                        Download Image
+                      </button>
+                      <button 
+                        onClick={() => {}}
+                        className="flex-1 btn-primary text-sm"
+                      >
+                        <Copy size={16} className="mr-2" />
+                        Copy Image URL
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center mx-auto">
+                      <Image size={24} className="text-gray-400" />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-gray-500">AI-generated poster will appear here</p>
+                      <p className="text-xs text-gray-400">
+                        {!campaignText.trim() ? 'Generate campaign text first' : 'Click Generate to create poster image'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+          </div>
+        </div>
+      </div>
+      <div className="card">
+        <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Campaigns</h2>
+        <div className="space-y-4">
+          {mockCampaigns.map(campaign => (
+            <div key={campaign.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between mb-3">
+                <h3 className="font-semibold text-gray-900">{campaign.title}</h3>
+                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
+              </div>
+              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{campaign.content}</p>
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex space-x-4">
+                  <span className="text-gray-600">
+                    <span className="font-medium">{campaign.reach}</span> reached
+                  </span>
+                  <span className="text-gray-600">
+                    <span className="font-medium">{campaign.engagement}</span> engagement
+                  </span>
+                </div>
+                <span className="text-primary-600 font-medium">{campaign.platform}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const EventOrganizerHome = () => {
-  const upcomingEvents = mockEvents.slice(0, 3)
-  
+  const upcomingEvents = mockEvents.slice(0, 3);
+  const [showDemandPlanning, setShowDemandPlanning] = useState(false);
+
+  if (showDemandPlanning) {
+    return <EventDemandPlanning onBack={() => setShowDemandPlanning(false)} />;
+  }
+
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
@@ -89,9 +590,11 @@ const EventOrganizerHome = () => {
       <div className="card">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Upcoming Events</h2>
-          <button className="btn-primary">
-            <Plus size={16} className="mr-2" />
-            Create Event
+          <button
+            className="font-family: 'Inter', sans-serif; bg-gray-200 text-black text-lg inline-flex items-center px-6 py-3 rounded-xl font-semibold border border-gray-300 hover:bg-gray-300 transition shadow-md"
+            onClick={() => setShowDemandPlanning(true)}
+          >
+            Manage
           </button>
         </div>
         
@@ -124,10 +627,7 @@ const EventOrganizerHome = () => {
                     <p className="text-sm text-gray-600">{event.description}</p>
                   </div>
                 </div>
-                <div className="flex space-x-2">
-                  <button className="btn-outline text-sm">Edit</button>
-                  <button className="btn-primary text-sm">Manage</button>
-                </div>
+                
               </div>
             </div>
           ))}
@@ -644,8 +1144,19 @@ const RippleEffectDashboard = () => {
 
 import { Brain, MessageSquare, AlertTriangle, DollarSign, ChevronDown, ChevronUp, X } from 'lucide-react';
 
-const EventDemandPlanning = () => {
-  const [events] = useState(mockEvents.filter(e => e.title !== 'Startup Pitch Competition'));
+const EventDemandPlanning = ({ onBack }) => {
+  const [events, setEvents] = useState(mockEvents.filter(e => e.title !== 'Startup Pitch Competition'));
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newEvent, setNewEvent] = useState({
+    title: '',
+    description: '',
+    date: '',
+    time: '',
+    location: '',
+    price: '',
+    category: '',
+    image: ''
+  });
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [aiResponse, setAiResponse] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -757,11 +1268,65 @@ const EventDemandPlanning = () => {
   };
   return (
     <div className="space-y-8 max-w-7xl mx-auto p-6">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">AI-Enhanced Event Demand Planning</h1>
-        <p className="text-gray-600 mb-6">Click an event to get AI-powered market demand predictions and recommendations.</p>
+      <div className="flex justify-between items-center mb-2">
+        <button
+          className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-medium shadow mr-4"
+          onClick={onBack}
+        >
+          ← Back
+        </button>
+        <h1 className="text-4xl font-bold text-gray-900">AI-Enhanced Event Demand Planning</h1>
       </div>
+      <p className="text-gray-600 mb-6">Click an event to get AI-powered market demand predictions and recommendations.</p>
       <div className="grid lg:grid-cols-2 gap-8">
+        {showCreateModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center" style={{background: 'rgba(30,41,59,0.15)'}} onClick={() => setShowCreateModal(false)}>
+            <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-6 md:p-12 relative animate-fadeIn border border-gray-200 max-h-screen overflow-y-auto" onClick={e => e.stopPropagation()}>
+              <h2 className="text-3xl font-extrabold text-gray-900 mb-8 text-center tracking-tight">Create New Event</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div className="space-y-6">
+                  <input type="text" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 text-lg font-semibold placeholder-gray-400" placeholder="Event Title" value={newEvent.title} onChange={e => setNewEvent(ev => ({...ev, title: e.target.value}))} />
+                  <input type="text" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 text-lg font-semibold placeholder-gray-400" placeholder="Location" value={newEvent.location} onChange={e => setNewEvent(ev => ({...ev, location: e.target.value}))} />
+                  <input type="number" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 text-lg font-semibold placeholder-gray-400" placeholder="Price" value={newEvent.price} onChange={e => setNewEvent(ev => ({...ev, price: e.target.value}))} />
+                  <input type="text" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 text-lg font-semibold placeholder-gray-400" placeholder="Category" value={newEvent.category} onChange={e => setNewEvent(ev => ({...ev, category: e.target.value}))} />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Event Image</label>
+                    <PosterDropzone 
+                      image={newEvent.image}
+                      setImage={(image) => setNewEvent(ev => ({...ev, image}))}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-6 flex flex-col h-full">
+                  <textarea className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 text-lg font-semibold placeholder-gray-400 resize-none flex-1" placeholder="Event Description" value={newEvent.description} onChange={e => setNewEvent(ev => ({...ev, description: e.target.value}))} rows={7} />
+                  <div className="flex gap-4">
+                    <input type="date" className="w-1/2 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 text-lg font-semibold placeholder-gray-400" value={newEvent.date} onChange={e => setNewEvent(ev => ({...ev, date: e.target.value}))} />
+                    <input type="time" className="w-1/2 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 text-lg font-semibold placeholder-gray-400" value={newEvent.time} onChange={e => setNewEvent(ev => ({...ev, time: e.target.value}))} />
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-center gap-6 mt-2">
+                <button className="px-6 py-3 rounded-xl font-semibold text-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition" onClick={() => setShowCreateModal(false)}>Cancel</button>
+                <button className="px-8 py-3 rounded-xl font-bold text-lg bg-primary-600 text-white shadow-lg hover:bg-primary-700 transition" onClick={() => {
+                  setEvents(evts => [
+                    {
+                      id: Date.now(),
+                      ...newEvent,
+                      date: newEvent.date,
+                      time: newEvent.time,
+                      price: newEvent.price || 0,
+                      category: newEvent.category || 'General',
+                      image: newEvent.image || 'https://via.placeholder.com/400x200?text=No+Image'
+                    },
+                    ...events
+                  ]);
+                  setShowCreateModal(false);
+                  setNewEvent({title:'',description:'',date:'',time:'',location:'',price:'',category:'',image:''});
+                }}>Create</button>
+              </div>
+            </div>
+          </div>
+        )}
         {events.map(event => (
           <div key={event.id} className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-2xl hover:scale-105 transition-transform transition-shadow duration-200" onClick={() => { setSelectedEvent(event); handleAIQuery(event); }}>
             <div className="relative">
@@ -830,7 +1395,6 @@ const EventDemandPlanning = () => {
       )}
     </div>
   );
-// ...existing code...
 }
 
 const EventOrganizerDashboard = () => {
@@ -838,20 +1402,24 @@ const EventOrganizerDashboard = () => {
 
   const sidebarItems = [
     { name: 'Dashboard', href: '/event-organizer', icon: Home, active: location.pathname === '/event-organizer' },
+    { name: 'Marketing Studio', href: '/event-organizer/campaign-studio', icon: Megaphone, active: location.pathname === '/event-organizer/campaign-studio' },
     { name: 'Events', href: '/event-organizer/events', icon: Calendar, active: location.pathname === '/event-organizer/events' },
     { name: 'Vendor Matching', href: '/event-organizer/vendors', icon: Users, active: location.pathname === '/event-organizer/vendors' },
     { name: 'Smart City Integration', href: '/event-organizer/smart-city', icon: MapPin, active: location.pathname === '/event-organizer/smart-city' },
-    { name: 'Ripple Effect Dashboard', href: '/event-organizer/ripple-effects', icon: BarChart3, active: location.pathname === '/event-organizer/ripple-effects' }
+    { name: 'Ripple Effect Dashboard', href: '/event-organizer/ripple-effects', icon: BarChart3, active: location.pathname === '/event-organizer/ripple-effects' },
+    
   ];
 
   return (
     <DashboardLayout sidebarItems={sidebarItems} title="Event Organizer Dashboard">
       <Routes>
         <Route path="/" element={<EventOrganizerHome />} />
+        <Route path="/campaign-studio" element={<EventOrganizerCampaignStudio />} />
         <Route path="/events" element={<EventDemandPlanning />} />
         <Route path="/smart-city" element={<SmartCityDashboard />} />
         <Route path="/ripple-effects" element={<RippleEffectDashboard />} />
         <Route path="/vendors" element={<VendorMatchingDashboard />} />
+        
       </Routes>
     </DashboardLayout>
   );
