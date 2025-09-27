@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import DashboardLayout from '../components/DashboardLayout'
+import PosterGeneration from './PosterGeneration'
+import VendorMatchingDashboard from '../components/VendorMatchingDashboard'
 import { RippleEffectChart, MetricCard, TrafficChart } from '../components/Charts'
 import { SMECard } from '../components/Cards'
 import { mockSMEs, mockRippleEffects, mockEvents } from '../data/mockData'
@@ -29,7 +31,7 @@ const EventOrganizerHome = () => {
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-secondary-500 to-accent-500 rounded-2xl p-8 text-white">
+      <div className="bg-gradient-to-r from-secondary-500 to-accent-500 rounded-2xl p-8 text-black">
         <h1 className="text-3xl font-bold mb-2">Event Dashboard 🎉</h1>
         <p className="text-secondary-100 mb-6">Manage your events and optimize city resources efficiently</p>
         
@@ -524,26 +526,219 @@ const RippleEffectDashboard = () => {
   )
 }
 
+import { Brain, MessageSquare, AlertTriangle, DollarSign, ChevronDown, ChevronUp, X } from 'lucide-react';
+
+const EventDemandPlanning = () => {
+  const [events] = useState(mockEvents.filter(e => e.title !== 'Startup Pitch Competition'));
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [aiResponse, setAiResponse] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showOptimization, setShowOptimization] = useState({});
+
+  // AI-Enhanced Demand Prediction with multiple factors
+  const getAIEnhancedPrediction = (event) => {
+    const baseAttendees = event.attendees || event.price * 10 || 500;
+    // Weather impact factor
+    const weatherMultiplier = {
+      'sunny': 1.2,
+      'partly_cloudy': 1.0,
+      'rainy': 0.8,
+      'stormy': 0.6
+    }[event.weather] || 1.0;
+    // Day of week impact
+    const dayMultiplier = {
+      'Monday': 0.8, 'Tuesday': 0.9, 'Wednesday': 0.9,
+      'Thursday': 0.95, 'Friday': 1.1, 'Saturday': 1.3, 'Sunday': 1.2
+    }[event.dayOfWeek] || 1.0;
+    // Category-specific behavior patterns
+    const categoryFactors = {
+      'Technology': { food: 0.7, hotel: 0.3, parking: 0.6, shuttle: 0.4 },
+      'Food & Beverage': { food: 0.2, hotel: 0.1, parking: 0.8, shuttle: 0.6 },
+      'Business': { food: 0.9, hotel: 0.4, parking: 0.5, shuttle: 0.3 }
+    };
+    const factors = categoryFactors[event.category] || categoryFactors['Business'];
+    const adjustedAttendees = Math.round(baseAttendees * weatherMultiplier * dayMultiplier);
+    // AI-calculated predictions with confidence intervals
+    const foodStalls = Math.ceil(adjustedAttendees / (100 / factors.food));
+    const hotelRooms = Math.ceil(adjustedAttendees * (event.category === 'Technology' ? 0.25 : 
+                                  event.category === 'Food & Beverage' ? 0.08 : 0.15) * factors.hotel);
+    const parkingSpots = Math.ceil(adjustedAttendees * 0.6 * factors.parking);
+    const shuttles = Math.ceil(adjustedAttendees / (120 / factors.shuttle));
+    // Risk assessment
+    const riskLevel = weatherMultiplier < 0.9 ? 'high' : 
+                     adjustedAttendees > baseAttendees * 1.2 ? 'medium' : 'low';
+    // Confidence scores (simulated AI confidence)
+    const confidence = {
+      foodStalls: Math.min(95, 75 + (factors.food * 20)),
+      hotelRooms: Math.min(95, 70 + (factors.hotel * 25)),
+      parkingSpots: Math.min(95, 80 + (factors.parking * 15)),
+      shuttles: Math.min(95, 65 + (factors.shuttle * 30))
+    };
+    return {
+      adjustedAttendees,
+      foodStalls,
+      hotelRooms,
+      parkingSpots,
+      shuttles,
+      riskLevel,
+      confidence,
+      weatherImpact: ((weatherMultiplier - 1) * 100).toFixed(1),
+      dayImpact: ((dayMultiplier - 1) * 100).toFixed(1)
+    };
+  };
+
+  // AI Agent for intelligent recommendations
+  const getAIRecommendations = (event, prediction) => {
+    const recommendations = [];
+    if (prediction.riskLevel === 'high') {
+      recommendations.push({
+        type: 'warning',
+        message: `High risk event due to weather conditions. Consider increasing shuttle frequency by 25%.`,
+        action: 'Increase contingency planning'
+      });
+    }
+    if (prediction.adjustedAttendees > (event.attendees || 500) * 1.1) {
+      recommendations.push({
+        type: 'info',
+        message: `Expected 10%+ higher attendance. Recommend securing additional ${Math.ceil(prediction.foodStalls * 0.2)} food vendors.`,
+        action: 'Scale up resources'
+      });
+    }
+    if (event.category === 'Technology' && prediction.hotelRooms > 100) {
+      recommendations.push({
+        type: 'success',
+        message: `Tech event with high hotel demand. Partner with nearby hotels for group discounts.`,
+        action: 'Negotiate partnerships'
+      });
+    }
+    return recommendations;
+  };
+
+  // Simulated AI Chat Agent
+  const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+  const handleAIQuery = async (event) => {
+    setIsProcessing(true);
+    setAiResponse('');
+    // Compose prompt for Gemini
+    const prompt = `Given the following event details, predict market demand spikes in Food, Hotel, and Parking demand. Suggest how to attract SMEs and event vendors to set up stalls, and how to optimize parking using a platform system.\nEvent: ${event.title}\nCategory: ${event.category}\nDate: ${event.date} ${event.time}\nLocation: ${event.location}\nDescription: ${event.description}\nExpected Attendees: ${event.attendees || (event.price * 10) || 500}`;
+    try {
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + GEMINI_API_KEY, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      });
+      const data = await res.json();
+      const response = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Gemini AI.';
+      setAiResponse(response);
+    } catch (err) {
+      setAiResponse('Error connecting to Gemini AI.');
+    }
+    setIsProcessing(false);
+  };
+  return (
+    <div className="space-y-8 max-w-7xl mx-auto p-6">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">AI-Enhanced Event Demand Planning</h1>
+        <p className="text-gray-600 mb-6">Click an event to get AI-powered market demand predictions and recommendations.</p>
+      </div>
+      <div className="grid lg:grid-cols-2 gap-8">
+        {events.map(event => (
+          <div key={event.id} className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-2xl hover:scale-105 transition-transform transition-shadow duration-200" onClick={() => { setSelectedEvent(event); handleAIQuery(event); }}>
+            <div className="relative">
+              <img src={event.image} alt={event.title} className="w-full h-48 object-cover rounded-t-xl shadow-sm" onError={e => { e.target.onerror=null; e.target.src='https://via.placeholder.com/400x200?text=No+Image'; }} />
+            </div>
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">{event.title}</h2>
+                  <div className="flex items-center text-sm text-gray-600 space-x-4">
+                    <span className="flex items-center"><Calendar className="w-4 h-4 mr-1" />{event.date} {event.time}</span>
+                    <span className="flex items-center"><MapPin className="w-4 h-4 mr-1" />{event.location}</span>
+                    <span className="flex items-center"><DollarSign className="w-4 h-4 mr-1" />${event.price}</span>
+                  </div>
+                </div>
+                <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">{event.category}</span>
+              </div>
+              <p className="text-gray-700 mb-6">{event.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      {selectedEvent && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center" 
+          style={{background: 'rgba(255,255,255,0.85)'}} 
+          onClick={() => { setSelectedEvent(null); setAiResponse(''); }}
+        >
+          <div 
+            className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-8 relative animate-fadeIn" 
+            onClick={e => e.stopPropagation()} 
+          >
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedEvent.title}</h2>
+              <div className="flex items-center text-sm text-gray-600 space-x-4 mb-2">
+                <span className="flex items-center"><Calendar className="w-4 h-4 mr-1" />{selectedEvent.date} {selectedEvent.time}</span>
+                <span className="flex items-center"><MapPin className="w-4 h-4 mr-1" />{selectedEvent.location}</span>
+                <span className="flex items-center"><DollarSign className="w-4 h-4 mr-1" />${selectedEvent.price}</span>
+              </div>
+              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">{selectedEvent.category}</span>
+              <p className="text-gray-700 mt-2">{selectedEvent.description}</p>
+            </div>
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center"><Brain className="w-5 h-5 mr-2 text-blue-600" />AI Market Demand Prediction</h3>
+              {isProcessing ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full"></div>
+                  <span className="ml-4 text-blue-600 font-medium">Processing with Gemini AI...</span>
+                </div>
+              ) : (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-gray-800 whitespace-pre-line">
+                  {aiResponse
+                    ? aiResponse
+                    : <div className="flex flex-col items-center">
+                        <span className="text-gray-500 mb-2">No prediction available. Please check your Gemini API key or try again later.</span>
+                        <button className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onClick={() => handleAIQuery(selectedEvent)}>Retry</button>
+                      </div>
+                  }
+                </div>
+              )}
+            </div>
+            {/* Poster Generation UI */}
+            <PosterGeneration event={selectedEvent} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+// ...existing code...
+}
+
 const EventOrganizerDashboard = () => {
-  const location = useLocation()
-  
+  const location = useLocation();
+
   const sidebarItems = [
     { name: 'Dashboard', href: '/event-organizer', icon: Home, active: location.pathname === '/event-organizer' },
     { name: 'Events', href: '/event-organizer/events', icon: Calendar, active: location.pathname === '/event-organizer/events' },
     { name: 'Vendor Matching', href: '/event-organizer/vendors', icon: Users, active: location.pathname === '/event-organizer/vendors' },
     { name: 'Smart City Integration', href: '/event-organizer/smart-city', icon: MapPin, active: location.pathname === '/event-organizer/smart-city' },
     { name: 'Ripple Effect Dashboard', href: '/event-organizer/ripple-effects', icon: BarChart3, active: location.pathname === '/event-organizer/ripple-effects' }
-  ]
+  ];
 
   return (
     <DashboardLayout sidebarItems={sidebarItems} title="Event Organizer Dashboard">
       <Routes>
         <Route path="/" element={<EventOrganizerHome />} />
+        <Route path="/events" element={<EventDemandPlanning />} />
         <Route path="/smart-city" element={<SmartCityIntegration />} />
         <Route path="/ripple-effects" element={<RippleEffectDashboard />} />
+        <Route path="/vendors" element={<VendorMatchingDashboard />} />
       </Routes>
     </DashboardLayout>
-  )
+  );
 }
 
 export default EventOrganizerDashboard
