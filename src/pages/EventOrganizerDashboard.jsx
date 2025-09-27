@@ -29,6 +29,7 @@ const mockCampaigns = [
 const EventOrganizerCampaignStudio = () => {
   const [selectedCampaign, setSelectedCampaign] = useState(mockCampaigns[0]);
   const [campaignText, setCampaignText] = useState(selectedCampaign.content);
+  const [estimatedReach, setEstimatedReach] = useState('2,500+');
   const [showPosterGenerator, setShowPosterGenerator] = useState(false);
   const [posterPrompt, setPosterPrompt] = useState("");
   const [generatedImage, setGeneratedImage] = useState(null);
@@ -62,6 +63,9 @@ const EventOrganizerCampaignStudio = () => {
       setCampaignText(
         'Join us for the Tech Innovation Expo 2025! Discover the latest in technology, network with industry leaders, and take advantage of our special offer: 30% off early bird tickets. Don’t miss out on this exciting event!'
       );
+      // Randomize estimated reach between 1500 and 3000
+      const randomReach = Math.floor(Math.random() * (3000 - 1500 + 1)) + 1500;
+      setEstimatedReach(`${randomReach.toLocaleString()}+`);
       setIsGeneratingText(false);
     }, 1200);
   };
@@ -77,7 +81,8 @@ const EventOrganizerCampaignStudio = () => {
   const handleGeneratePoster = async () => {
     setIsGeneratingPoster(true);
     setTimeout(() => {
-      setGeneratedImage('https://via.placeholder.com/400x600?text=Event+Poster');
+      // Simulate AI poster generation failure by setting generatedImage to null
+      setGeneratedImage(null);
       setShowPosterGenerator(true);
       setIsGeneratingPoster(false);
     }, 1200);
@@ -106,9 +111,9 @@ const EventOrganizerCampaignStudio = () => {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <Home size={28} className="text-primary-600 ml-[2px]" />
-          <h1 className="text-2xl font-bold text-gray-900 ml-[100px]">Marketing Studio</h1>
+        <div className="flex items-center gap-8">
+          <Home size={28} className="text-primary-600 ml-[24px]" />
+          <h1 className="text-2xl font-bold text-gray-900">Marketing Studio</h1>
         </div>
         <div className="flex space-x-3">
           <button 
@@ -157,11 +162,12 @@ const EventOrganizerCampaignStudio = () => {
                   />
                 </div>
               ) : (
-                <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl h-64 flex items-center justify-center">
-                  <div className="text-center">
-                    <Image size={32} className="text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-500">No poster generated yet</p>
-                  </div>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                  <img 
+                    src={'/src/assets/tech-expo.jpg'}
+                    alt="Default Campaign Poster"
+                    className="w-full h-auto object-contain max-h-96"
+                  />
                 </div>
               )}
             </div>
@@ -212,7 +218,7 @@ const EventOrganizerCampaignStudio = () => {
                 <div className="mt-4 pt-4 border-t border-blue-200">
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
-                      <div className="text-lg font-bold text-primary-600">2,500+</div>
+                      <div className="text-lg font-bold text-primary-600">{estimatedReach}</div>
                       <div className="text-xs text-gray-600">Est. Reach</div>
                     </div>
                     <div>
@@ -389,7 +395,7 @@ const EventOrganizerCampaignStudio = () => {
                 <div className="text-sm text-gray-600">Based on your audience</div>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-primary-600">2,500+</div>
+                <div className="text-2xl font-bold text-primary-600">{estimatedReach}</div>
                 <div className="text-sm text-gray-600">people</div>
               </div>
             </div>
@@ -400,9 +406,9 @@ const EventOrganizerCampaignStudio = () => {
             <h2 className="text-xl font-bold text-gray-900">AI Poster Generator</h2>
             <button 
               onClick={handleGeneratePoster}
-              disabled={isGeneratingPoster || !campaignText.trim()}
+              disabled={isGeneratingPoster}
               className={`btn-secondary text-sm ${
-                isGeneratingPoster || !campaignText.trim() ? 'opacity-50 cursor-not-allowed' : ''
+                isGeneratingPoster ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
               <Image size={16} className="mr-2" />
@@ -452,15 +458,15 @@ const EventOrganizerCampaignStudio = () => {
               </div>
             )}
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                {showPosterGenerator && generatedImage ? (
+                {showPosterGenerator ? (
                   <div className="space-y-4">
                     <img 
-                      src={generatedImage}
-                      alt="AI-Generated Poster"
+                      src={generatedImage || '/src/assets/tech-expo.jpg'}
+                      alt="Poster"
                       className="w-full max-h-96 object-contain rounded-lg shadow-lg"
                     />
                     <div className="space-y-2">
-                      <p className="text-sm font-medium text-gray-900">AI-Generated Poster</p>
+                      <p className="text-sm font-medium text-gray-900">{generatedImage ? 'AI-Generated Poster' : 'Default Poster'}</p>
                       <p className="text-xs text-gray-600">Right-click to save or copy the image</p>
                     </div>
                     <div className="flex space-x-2">
@@ -487,9 +493,7 @@ const EventOrganizerCampaignStudio = () => {
                     </div>
                     <div className="space-y-2">
                       <p className="text-gray-500">AI-generated poster will appear here</p>
-                      <p className="text-xs text-gray-400">
-                        {!campaignText.trim() ? 'Generate campaign text first' : 'Click Generate to create poster image'}
-                      </p>
+                      <p className="text-xs text-gray-400">Click Generate to create poster image</p>
                     </div>
                   </div>
                 )}
@@ -978,13 +982,12 @@ const RippleEffectDashboard = () => {
   const [timeRange, setTimeRange] = useState('24h')
   
   const trafficData = [
-    { name: 'Food & Beverage', value: 35 },
-    { name: 'Transportation', value: 25 },
-    { name: 'Accommodation', value: 20 },
-    { name: 'Retail', value: 15 },
-    { name: 'Entertainment', value: 5 }
-  ]
-
+  { name: 'Parking Occupancy', value: 35 },
+  { name: 'Shuttle Bus Usage', value: 25 },
+  { name: 'Pedestrian Flow', value: 20 },
+  { name: 'Vehicle Flow', value: 15 },
+  { name: 'Traffic Congestion', value: 5 }
+];
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -1278,22 +1281,25 @@ const EventDemandPlanning = ({ onBack }) => {
   };
   return (
     <div className="space-y-8 max-w-7xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-2 relative">
         <button
           className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-medium shadow mr-4"
           onClick={onBack}
         >
           ← Back
         </button>
-        <div className="text-center w-full">
-          <h1 className="text-4xl font-bold text-gray-900">AI-Enhanced Event Demand Planning</h1>
-          <p className="text-gray-600 mb-6">Click an event to get AI-powered market demand predictions and recommendations.</p>
+        <div className="flex-1 flex items-center justify-center">
+          <h1 className="text-4xl font-bold text-gray-900 text-center w-full">AI-Enhanced Event Demand Planning</h1>
         </div>
+  <button className="btn-primary px-6 py-2 rounded-lg font-semibold text-base flex items-center gap-2 shadow-md hover:bg-primary-600 transition ml-4" style={{position:'absolute', right:0, top:'4.5rem'}} onClick={() => setShowCreateModal(true)}>
+          <span className="text-xl font-bold">+</span> Create
+        </button>
       </div>
+      <p className="text-gray-600 mb-6 text-center">Click an event to get AI-powered market demand predictions and recommendations.</p>
       <div className="grid lg:grid-cols-2 gap-8">
         {showCreateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center" style={{background: 'rgba(30,41,59,0.15)'}} onClick={() => setShowCreateModal(false)}>
-            <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-6 md:p-12 relative animate-fadeIn border border-gray-200 max-h-screen overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-6 md:p-8 relative animate-fadeIn border border-gray-200 max-h-[60vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
               <h2 className="text-3xl font-extrabold text-gray-900 mb-8 text-center tracking-tight">Create New Event</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div className="space-y-6">
@@ -1310,7 +1316,7 @@ const EventDemandPlanning = ({ onBack }) => {
                   </div>
                 </div>
                 <div className="space-y-6 flex flex-col h-full">
-                  <textarea className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 text-lg font-semibold placeholder-gray-400 resize-none flex-1" placeholder="Event Description" value={newEvent.description} onChange={e => setNewEvent(ev => ({...ev, description: e.target.value}))} rows={7} />
+                  <textarea className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 text-base font-semibold placeholder-gray-400 resize-none" placeholder="Event Description" value={newEvent.description} onChange={e => setNewEvent(ev => ({...ev, description: e.target.value}))} rows={12} />
                   <div className="flex gap-4">
                     <input type="date" className="w-1/2 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 text-lg font-semibold placeholder-gray-400" value={newEvent.date} onChange={e => setNewEvent(ev => ({...ev, date: e.target.value}))} />
                     <input type="time" className="w-1/2 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 text-lg font-semibold placeholder-gray-400" value={newEvent.time} onChange={e => setNewEvent(ev => ({...ev, time: e.target.value}))} />

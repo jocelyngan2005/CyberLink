@@ -58,11 +58,12 @@ export const RippleEffectChart = ({ data }) => (
   <div className="card">
     <h3 className="text-lg font-semibold text-gray-900 mb-4">Sector Impact Analysis</h3>
     <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={data} layout="horizontal">
+      <BarChart data={data} layout="vertical">
         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-        <XAxis type="number" stroke="#666" />
+        <XAxis type="number" domain={[0, 100]} stroke="#666" />
         <YAxis dataKey="sector" type="category" width={120} stroke="#666" />
         <Tooltip 
+          formatter={(value) => [`${value}%`, 'Impact']}
           contentStyle={{ 
             backgroundColor: '#fff', 
             border: '1px solid #e5e7eb', 
@@ -70,7 +71,24 @@ export const RippleEffectChart = ({ data }) => (
             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
           }} 
         />
-        <Bar dataKey="impact" fill="#6366f1" radius={[0, 4, 4, 0]} />
+        <Bar dataKey="impact" radius={8} barSize={18}
+          label={({ x, y, width, value }) => (
+            <text
+              x={x + width + 12}
+              y={y + 9}
+              textAnchor="end"
+              fill="#333"
+              fontWeight="bold"
+              fontSize={14}
+            >
+              {`${value}%`}
+            </text>
+          )}
+        >
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.color} />
+          ))}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   </div>

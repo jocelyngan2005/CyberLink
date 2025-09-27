@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
 import { 
   MapPin, 
   Car, 
@@ -205,23 +203,20 @@ const RippleEffectChart = ({ data }) => (
       <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-900 bg-clip-text text-transparent">Sector Impact Analysis</h3>
     </div>
     <ResponsiveContainer width="100%" height={350}>
-      <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="90%" data={data}>
-        <RadialBar
-          dataKey="impact"
-          cornerRadius={15}
-          fill={(entry) => entry.color}
-        />
-        <Tooltip
-          formatter={(value) => [`${value}%`, 'Impact Level']}
-          labelFormatter={(label) => `Sector: ${label}`}
-          contentStyle={{
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            border: 'none',
-            borderRadius: '12px',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
-          }}
-        />
-      </RadialBarChart>
+      <BarChart
+        data={data}
+        layout="vertical"
+        margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
+      >
+        <XAxis type="number" domain={[0, 100]} hide />
+        <YAxis type="category" dataKey="sector" tick={{ fontWeight: 'bold', fontSize: 14 }} width={120} />
+        <Tooltip formatter={(value, name, props) => [`${value}%`, 'Impact']} labelFormatter={label => `Sector: ${label}`} />
+        <Bar dataKey="impact" radius={8} barSize={18}>
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.color} />
+          ))}
+        </Bar>
+      </BarChart>
     </ResponsiveContainer>
     <div className="grid grid-cols-2 gap-3 mt-6">
       {data.map((item, index) => (
@@ -354,237 +349,227 @@ const EconomicImpactChart = ({ data }) => (
     </ResponsiveContainer>
   </div>
 );
-// Add this at the top of your component to test
 
-// Add this component before SmartCityDashboard
-const MapboxCityMap = ({ selectedLayer, timeFilter }) => {
-  const mapContainer = useRef(null)
-  const map = useRef(null)
-  const [mapLoaded, setMapLoaded] = useState(false) // ✅ Correct placement
-  const [error, setError] = useState(null) 
+// Google Maps City Map Component
+const GoogleCityMap = ({ selectedLayer, timeFilter }) => {
+  const mapContainer = useRef(null);
+  const map = useRef(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [error, setError] = useState(null);
+  const markersRef = useRef({
+    parking: [],
+    event: null,
+    shuttle: null
+  });
+  const infoWindowRef = useRef(null);
 
+  // Load Google Maps script
   useEffect(() => {
-    if (map.current) return
+    const loadGoogleMaps = () => {
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      
+      if (!apiKey) {
+        console.error('❌ VITE_GOOGLE_MAPS_API_KEY is not set in environment variables');
+        setError('Google Maps API key not configured');
+        return;
+      }
 
-    mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN
-    console.log('Mapbox token:', mapboxgl.accessToken ? 'Present' : 'Missing')
-    
-    if (!mapboxgl.accessToken) {
-      console.error('❌ VITE_MAPBOX_TOKEN is not set in environment variables')
-      setError('Mapbox token not configured')
-      return
-    }
+      if (window.google && window.google.maps) {
+        initializeMap();
+        return;
+      }
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [101.6369, 2.9213],
-      zoom: 13
-    })
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
+      script.async = true;
+      script.defer = true;
+      
+      window.initMap = initializeMap;
+      
+      script.onerror = () => {
+        console.error('Failed to load Google Maps script');
+        setError('Failed to load Google Maps');
+      };
 
-    // FIXED: Wait for map to fully load before adding layers
-    map.current.on('load', () => {
-      console.log('Map loaded successfully')
-      setMapLoaded(true)
+      document.head.appendChild(script);
+    };
 
-      // Add parking zones
-      map.current.addSource('parking-zones', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: [
+    const initializeMap = () => {
+      if (!mapContainer.current || map.current) return;
+
+      try {
+        // Initialize map
+        map.current = new window.google.maps.Map(mapContainer.current, {
+          center: { lat: 2.9213, lng: 101.6369 }, // Cyberjaya coordinates
+          zoom: 13,
+          styles: [
             {
-              type: 'Feature',
-              geometry: { type: 'Point', coordinates: [101.6369, 2.9213] },
-              properties: { title: 'Cyberjaya Central Mall', occupancy: '85%', available: 85 }
+              featureType: 'all',
+              elementType: 'geometry.fill',
+              stylers: [{ saturation: -20 }]
             },
             {
-              type: 'Feature',
-              geometry: { type: 'Point', coordinates: [101.6389, 2.9233] },
-              properties: { title: 'Shaftsbury Square', occupancy: '45%', available: 23 }
-            },
-            {
-              type: 'Feature',
-              geometry: { type: 'Point', coordinates: [101.6349, 2.9193] },
-              properties: { title: 'MMU Campus', occupancy: '35%', available: 156 }
+              featureType: 'water',
+              elementType: 'geometry',
+              stylers: [{ color: '#c6e2ff' }]
             }
-          ]
-        }
-      })
-
-      // Add background circle for depth effect
-      map.current.addLayer({
-        id: 'parking-zones-bg',
-        type: 'circle',
-        source: 'parking-zones',
-        paint: {
-          'circle-radius': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            10, 12,
-            15, 28
           ],
-          'circle-color': '#000000',
-          'circle-opacity': 0.1
-        }
-      })
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false
+        });
 
-      // Enhanced main parking markers
-      map.current.addLayer({
-        id: 'parking-zones',
-        type: 'circle',
-        source: 'parking-zones',
-        paint: {
-          'circle-radius': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            10, 8,
-            15, 20
-          ],
-          'circle-color': [
-            'case',
-            ['>', ['get', 'available'], 100], '#10B981',
-            ['>', ['get', 'available'], 50], '#F59E0B',
-            '#EF4444'
-          ],
-          'circle-stroke-width': 3,
-          'circle-stroke-color': '#ffffff',
-          'circle-opacity': 0.8,
-          'circle-stroke-opacity': 1,
-          'circle-blur': 0.5
-        }
-      })
+        // Initialize InfoWindow
+        infoWindowRef.current = new window.google.maps.InfoWindow();
 
-      // Add event venue
-      map.current.addSource('event-venue', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: [{
-            type: 'Feature',
-            geometry: { type: 'Point', coordinates: [101.6379, 2.9223] },
-            properties: { title: 'Main Event Venue', capacity: '420/500' }
-          }]
-        }
-      })
+        // Create parking markers
+        // Use only three colors: green, orange, and red
+        const COLORS = ['#10B981', '#F59E0B', '#EF4444'];
+        const cityPoints = [
+          { lat: 2.9213, lng: 101.6369, title: 'Cyberjaya Central Mall', color: COLORS[0], info: 'Parking: 85 slots', type: 'parking' },
+          { lat: 2.9240, lng: 101.6390, title: 'Shaftsbury Square', color: COLORS[1], info: 'Parking: 23 slots', type: 'parking' },
+          { lat: 2.9180, lng: 101.6320, title: 'MMU Campus', color: COLORS[2], info: 'Parking: 156 slots', type: 'parking' },
+          { lat: 2.9270, lng: 101.6410, title: 'Park & Ride', color: COLORS[0], info: 'Parking: 40 slots', type: 'parking' },
+          { lat: 2.9228, lng: 101.6355, title: 'Transit Hub', color: COLORS[1], info: 'Transit: Bus & LRT', type: 'transit' },
+          { lat: 2.9255, lng: 101.6420, title: 'Shuttle Stop', color: COLORS[2], info: 'Shuttle Stop', type: 'transit' },
+          { lat: 2.9190, lng: 101.6400, title: 'LRT Station', color: COLORS[0], info: 'Transit: LRT', type: 'transit' },
+          { lat: 2.9218, lng: 101.6375, title: 'Main Auditorium', color: COLORS[1], info: 'Crowd: High', type: 'crowd' },
+          { lat: 2.9205, lng: 101.6380, title: 'Food Court', color: COLORS[2], info: 'Crowd: Moderate', type: 'crowd' },
+          { lat: 2.9260, lng: 101.6330, title: 'Exhibition Hall', color: COLORS[0], info: 'Crowd: Low', type: 'crowd' },
+          { lat: 2.9245, lng: 101.6360, title: 'Security Post', color: COLORS[1], info: 'Security', type: 'security' },
+          { lat: 2.9280, lng: 101.6380, title: 'Police Booth', color: COLORS[2], info: 'Security', type: 'security' },
+          { lat: 2.9230, lng: 101.6340, title: 'Sanitation Station', color: COLORS[0], info: 'Sanitation', type: 'sanitation' },
+          { lat: 2.9195, lng: 101.6370, title: 'Restroom', color: COLORS[1], info: 'Sanitation', type: 'sanitation' },
+          { lat: 2.9220, lng: 101.6430, title: 'Tech Expo', color: COLORS[2], info: 'Event', type: 'event' },
+          { lat: 2.9170, lng: 101.6350, title: 'Startup Zone', color: COLORS[0], info: 'Event', type: 'event' },
+          { lat: 2.9250, lng: 101.6300, title: 'Green Park', color: COLORS[1], info: 'Park', type: 'park' },
+          { lat: 2.9290, lng: 101.6370, title: 'Art Space', color: COLORS[2], info: 'Art', type: 'art' },
+        ];
 
-      map.current.addLayer({
-        id: 'event-venue',
-        type: 'circle',
-        source: 'event-venue',
-        paint: {
-          'circle-radius': 20,
-          'circle-color': '#EF4444',
-          'circle-stroke-width': 4,
-          'circle-stroke-color': '#ffffff',
-          'circle-opacity': 0.9
-        }
-      })
+        markersRef.current.parking = cityPoints.map(data => {
+          const marker = new window.google.maps.Marker({
+            position: { lat: data.lat, lng: data.lng },
+            map: map.current,
+            title: data.title,
+            icon: {
+              path: window.google.maps.SymbolPath.CIRCLE,
+              fillColor: data.color,
+              fillOpacity: 0.85,
+              strokeColor: '#ffffff',
+              strokeWeight: 3,
+              scale: 15
+            }
+          });
+          marker.addListener('click', () => {
+            infoWindowRef.current.setContent(`
+              <div class="p-3 bg-white rounded-lg">
+                <h3 class="font-bold text-gray-900 mb-2">${data.title}</h3>
+                <p class="text-sm text-gray-600 mb-1">${data.info}</p>
+                <span class="inline-block px-2 py-1 rounded" style="background:${data.color};color:#fff">${data.type.charAt(0).toUpperCase() + data.type.slice(1)}</span>
+              </div>
+            `);
+            infoWindowRef.current.open(map.current, marker);
+          });
+          return { marker, type: data.type, data };
+        });
 
-      // Add shuttle routes
-      map.current.addSource('shuttle-routes', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: [{
-            type: 'Feature',
-            geometry: {
-              type: 'LineString',
-              coordinates: [
-                [101.6350, 2.9200], [101.6370, 2.9220], 
-                [101.6390, 2.9240], [101.6410, 2.9260]
-              ]
-            },
-            properties: { route: 'Campus Shuttle A' }
-          }]
-        }
-      })
+        // Create event venue marker
+        const eventMarker = new window.google.maps.Marker({
+          position: { lat: 2.9223, lng: 101.6379 },
+          map: map.current,
+          title: 'Main Event Venue',
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            fillColor: '#EF4444',
+            fillOpacity: 0.9,
+            strokeColor: '#ffffff',
+            strokeWeight: 4,
+            scale: 20
+          }
+        });
 
-      map.current.addLayer({
-        id: 'shuttle-routes',
-        type: 'line',
-        source: 'shuttle-routes',
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: {
-          'line-color': '#10B981',
-          'line-width': 6,
-          'line-dasharray': [2, 2],
-          'line-opacity': 0.8
-        }
-      })
-
-      // Add click events
-      map.current.on('click', 'parking-zones', (e) => {
-        const coordinates = e.features[0].geometry.coordinates.slice()
-        const props = e.features[0].properties
-
-        new mapboxgl.Popup({ className: 'custom-popup' })
-          .setLngLat(coordinates)
-          .setHTML(`
-            <div class="p-3 bg-white rounded-lg shadow-lg">
-              <h3 class="font-bold text-gray-900">${props.title}</h3>
-              <p class="text-sm text-gray-600">Occupancy: <span class="font-semibold">${props.occupancy}</span></p>
-              <p class="text-sm text-gray-600">Available: <span class="font-semibold">${props.available} slots</span></p>
-              <button class="mt-2 px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
-                Book Now
-              </button>
-            </div>
-          `)
-          .addTo(map.current)
-      })
-
-      map.current.on('click', 'event-venue', (e) => {
-        const coordinates = e.features[0].geometry.coordinates.slice()
-        const props = e.features[0].properties
-
-        new mapboxgl.Popup({ className: 'custom-popup' })
-          .setLngLat(coordinates)
-          .setHTML(`
-            <div class="p-3 bg-white rounded-lg shadow-lg">
-              <h3 class="font-bold text-gray-900">${props.title}</h3>
-              <p class="text-sm text-gray-600">Capacity: <span class="font-semibold">${props.capacity}</span></p>
+        eventMarker.addListener('click', () => {
+          infoWindowRef.current.setContent(`
+            <div class="p-3 bg-white rounded-lg">
+              <h3 class="font-bold text-gray-900 mb-2">Main Event Venue</h3>
+              <p class="text-sm text-gray-600 mb-1">Capacity: <span class="font-semibold">420/500</span></p>
               <p class="text-sm text-red-600 font-medium">High density area</p>
             </div>
-          `)
-          .addTo(map.current)
-      })
+          `);
+          infoWindowRef.current.open(map.current, eventMarker);
+        });
 
-      // Change cursor on hover
-      map.current.on('mouseenter', 'parking-zones', () => {
-        map.current.getCanvas().style.cursor = 'pointer'
-      })
-      map.current.on('mouseleave', 'parking-zones', () => {
-        map.current.getCanvas().style.cursor = ''
-      })
-    })
+        markersRef.current.event = { marker: eventMarker, type: 'event' };
 
-    // FIXED: Add error handling
-    map.current.on('error', (e) => {
-      console.error('Map error:', e)
-    })
+        // Create shuttle route polyline
+        const shuttleRoute = new window.google.maps.Polyline({
+          path: [
+            { lat: 2.9200, lng: 101.6350 },
+            { lat: 2.9220, lng: 101.6370 },
+            { lat: 2.9240, lng: 101.6390 },
+            { lat: 2.9260, lng: 101.6410 }
+          ],
+          geodesic: true,
+          strokeColor: '#10B981',
+          strokeOpacity: 0.8,
+          strokeWeight: 6,
+          map: map.current
+        });
 
-    return () => map.current?.remove()
-  }, [])
+        markersRef.current.shuttle = { polyline: shuttleRoute, type: 'shuttle' };
 
-  // FIXED: Only update layers after map has loaded
-  useEffect(() => {
-    if (!map.current || !mapLoaded) return
+        console.log('Google Maps loaded successfully');
+        setMapLoaded(true);
 
-    const layers = ['parking-zones', 'shuttle-routes', 'event-venue']
-    
-    layers.forEach(layer => {
-      // FIXED: Check if layer exists before modifying it
-      if (map.current.getLayer(layer)) {
-        if (selectedLayer === 'all' || layer.includes(selectedLayer)) {
-          map.current.setLayoutProperty(layer, 'visibility', 'visible')
-        } else {
-          map.current.setLayoutProperty(layer, 'visibility', 'none')
-        }
+      } catch (err) {
+        console.error('Error initializing map:', err);
+        setError('Failed to initialize map');
       }
-    })
-  }, [selectedLayer, mapLoaded]) // FIXED: Added mapLoaded dependency
+    };
+
+    loadGoogleMaps();
+
+    return () => {
+      // Cleanup
+      if (window.initMap) {
+        delete window.initMap;
+      }
+    };
+  }, []);
+
+  // Handle layer visibility
+  useEffect(() => {
+    if (!mapLoaded || !map.current) return;
+
+    // Toggle parking markers
+    markersRef.current.parking.forEach(({ marker }) => {
+      if (selectedLayer === 'all' || selectedLayer === 'parking') {
+        marker.setMap(map.current);
+      } else {
+        marker.setMap(null);
+      }
+    });
+
+    // Toggle event marker
+    if (markersRef.current.event) {
+      const { marker } = markersRef.current.event;
+      if (selectedLayer === 'all' || selectedLayer === 'event') {
+        marker.setMap(map.current);
+      } else {
+        marker.setMap(null);
+      }
+    }
+
+    // Toggle shuttle route
+    if (markersRef.current.shuttle) {
+      const { polyline } = markersRef.current.shuttle;
+      if (selectedLayer === 'all' || selectedLayer === 'transport') {
+        polyline.setMap(map.current);
+      } else {
+        polyline.setMap(null);
+      }
+    }
+  }, [selectedLayer, mapLoaded]);
 
   return (
     <div className="relative">
@@ -610,7 +595,7 @@ const MapboxCityMap = ({ selectedLayer, timeFilter }) => {
           <div className="text-center">
             <div className="text-red-500 text-4xl mb-2">⚠️</div>
             <p className="text-red-600 text-sm font-medium">{error}</p>
-            <p className="text-red-500 text-xs mt-1">Please configure VITE_MAPBOX_TOKEN in .env file</p>
+            <p className="text-red-500 text-xs mt-1">Please configure VITE_GOOGLE_MAPS_API_KEY in .env file</p>
           </div>
         </div>
       )}
@@ -643,8 +628,8 @@ const MapboxCityMap = ({ selectedLayer, timeFilter }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const SmartCityDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -851,7 +836,7 @@ const SmartCityDashboard = () => {
             <div className="grid lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 bg-white rounded-xl shadow-lg border border-gray-100 p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Cyberjaya Infrastructure Map</h2>
-                <MapboxCityMap selectedLayer={selectedLayer} timeFilter={timeFilter} />
+                <GoogleCityMap selectedLayer={selectedLayer} timeFilter={timeFilter} />
               </div>
 
               {/* Infrastructure Status */}
@@ -958,65 +943,65 @@ const SmartCityDashboard = () => {
               </div>
             </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {parkingLots.map(lot => (
-                  <div key={lot.id} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:bg-black/90 group h-full flex flex-col">
-                    <div className="p-8 flex flex-col h-full">
-                      <div className="flex items-start justify-between mb-6">
-                        <div className="space-y-2">
-                          <h3 className="font-bold text-2xl text-black group-hover:text-blue-600 transition-colors">{lot.name}</h3>
-                          <p className="text-gray-600 text-sm font-medium flex items-center">
-                            <MapPin className="w-4 h-4 mr-1 text-blue-500" />
-                            {lot.distance}
-                          </p>
-                        </div>
-                        <div className={`px-4 py-2 rounded-full text-sm font-bold shadow-lg ${
-                          lot.availableSlots > 50 ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200' :
-                          lot.availableSlots > 20 ? 'bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-800 border border-yellow-200' :
-                          'bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-200'
-                        }`}>
-                          {lot.availableSlots} available
-                        </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {parkingLots.map(lot => (
+                <div key={lot.id} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:bg-white/90 group h-full flex flex-col">
+                  <div className="p-8 flex flex-col h-full">
+                    <div className="flex items-start justify-between mb-6">
+                      <div className="space-y-2">
+                        <h3 className="font-bold text-2xl text-black group-hover:text-blue-600 transition-colors">{lot.name}</h3>
+                        <p className="text-gray-600 text-sm font-medium flex items-center">
+                          <MapPin className="w-4 h-4 mr-1 text-blue-500" />
+                          {lot.distance}
+                        </p>
                       </div>
-
-                      <div className="space-y-4 mb-8 flex-grow">
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-600 font-medium">Capacity</span>
-                          <span className="font-bold text-lg text-black">{lot.availableSlots}/{lot.totalSlots}</span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                            <p className="text-sm text-blue-600 font-medium">Hourly Rate</p>
-                            <p className="text-xl font-bold text-black">RM {lot.hourlyRate}</p>
-                          </div>
-                          <div className="bg-green-50 rounded-xl p-4 border border-green-200">
-                            <p className="text-sm text-green-600 font-medium">Daily Rate</p>
-                            <p className="text-xl font-bold text-black">RM {lot.dailyRate}</p>
-                          </div>
-                        </div>
+                      <div className={`px-4 py-2 rounded-full text-sm font-bold shadow-lg ${
+                        lot.availableSlots > 50 ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200' :
+                        lot.availableSlots > 20 ? 'bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-800 border border-yellow-200' :
+                        'bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-200'
+                      }`}>
+                        {lot.availableSlots} available
                       </div>
-
-                      <div className="flex flex-wrap gap-2 mb-6 min-h-[3rem]">
-                        {lot.features.map((feature, idx) => (
-                          <span key={idx} className="px-3 py-2 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 text-sm rounded-full border border-blue-200 font-medium shadow-sm">
-                            {feature}
-                          </span>
-                        ))}
-                      </div>
-
-                      <button 
-                        className="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 text-black py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:via-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl mt-auto"
-                        onClick={() => {
-                          setSelectedService(lot);
-                          setShowBookingModal(true);
-                        }}
-                      >
-                        Book Parking Slot
-                      </button>
                     </div>
+
+                    <div className="space-y-4 mb-8 flex-grow">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600 font-medium">Capacity</span>
+                        <span className="font-bold text-lg text-black">{lot.availableSlots}/{lot.totalSlots}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                          <p className="text-sm text-blue-600 font-medium">Hourly Rate</p>
+                          <p className="text-xl font-bold text-black">RM {lot.hourlyRate}</p>
+                        </div>
+                        <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                          <p className="text-sm text-green-600 font-medium">Daily Rate</p>
+                          <p className="text-xl font-bold text-black">RM {lot.dailyRate}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mb-6 min-h-[3rem]">
+                      {lot.features.map((feature, idx) => (
+                        <span key={idx} className="px-3 py-2 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 text-sm rounded-full border border-blue-200 font-medium shadow-sm">
+                          {feature}
+                        </span>
+                      ))}
+                    </div>
+
+                    <button 
+                      className="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:via-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl mt-auto"
+                      onClick={() => {
+                        setSelectedService(lot);
+                        setShowBookingModal(true);
+                      }}
+                    >
+                      Book Parking Slot
+                    </button>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -1081,7 +1066,7 @@ const SmartCityDashboard = () => {
                     </div>
 
                     <button 
-                     className="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 text-black py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:via-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl mt-auto"
+                      className="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:via-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl mt-auto"
                       onClick={() => {
                         setSelectedService(route);
                         setShowBookingModal(true);
@@ -1156,7 +1141,7 @@ const SmartCityDashboard = () => {
                         <Eye className="w-4 h-4 inline mr-2" />
                         View Details
                       </button>
-                      <button className="flex-1 bg-orange-600 text-black py-2 rounded-lg font-bold hover:bg-orange-700 transition-colors">
+                      <button className="flex-1 bg-orange-600 text-white py-2 rounded-lg font-bold hover:bg-orange-700 transition-colors">
                         <AlertTriangle className="w-4 h-4 inline mr-2" />
                         Alert
                       </button>
@@ -1370,7 +1355,7 @@ const SmartCityDashboard = () => {
                     <>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Duration</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-poppins text-base font-medium tracking-wide" style={{ fontFamily: 'Poppins, Michroma, Inter, system-ui, sans-serif' }}>
+                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                           <option value="1">1 Hour</option>
                           <option value="2">2 Hours</option>
                           <option value="4">4 Hours</option>
@@ -1382,8 +1367,7 @@ const SmartCityDashboard = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Number</label>
                         <input 
                           type="text" 
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-poppins text-base font-medium tracking-wide" 
-                          style={{ fontFamily: 'Poppins, Michroma, Inter, system-ui, sans-serif' }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
                           placeholder="ABC 1234"
                         />
                       </div>
@@ -1394,7 +1378,7 @@ const SmartCityDashboard = () => {
                     <>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Departure Time</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-poppins text-base font-medium tracking-wide" style={{ fontFamily: 'Poppins, Michroma, Inter, system-ui, sans-serif' }}>
+                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                           <option value="08:00">08:00 AM</option>
                           <option value="08:15">08:15 AM</option>
                           <option value="08:30">08:30 AM</option>
@@ -1404,7 +1388,7 @@ const SmartCityDashboard = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Number of Passengers</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-poppins text-base font-medium tracking-wide" style={{ fontFamily: 'Poppins, Michroma, Inter, system-ui, sans-serif' }}>
+                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                           <option value="1">1 Passenger</option>
                           <option value="2">2 Passengers</option>
                           <option value="3">3 Passengers</option>
@@ -1418,8 +1402,7 @@ const SmartCityDashboard = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
                     <input 
                       type="tel" 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-poppins text-base font-medium tracking-wide"
-                      style={{ fontFamily: 'Poppins, Michroma, Inter, system-ui, sans-serif' }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="+60 12-345 6789"
                     />
                   </div>
@@ -1436,7 +1419,7 @@ const SmartCityDashboard = () => {
                     className={`flex-1 px-4 py-2 text-white rounded-lg font-semibold transition-all transform hover:scale-105 ${
                       activeTab === 'parking' 
                         ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800' 
-                        : 'bg-gradient-to-r from-green-600 to-  green-700 hover:from-green-700 hover:to-green-800'
+                        : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800'
                     }`}
                   >
                     Confirm Booking
@@ -1449,6 +1432,7 @@ const SmartCityDashboard = () => {
       </div>
     </div>
   );
+  
 };
 
 export default SmartCityDashboard;
