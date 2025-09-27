@@ -181,8 +181,8 @@ const LandingPage = () => {
                 LA TUA NUOVA CASA NEL VERDE
               </p>
               
-              <h1 className="text-5xl md:text-6xl font-serif font-bold text-gray-900">
-                Smart city 2020
+              <h1 className="text-5xl md:text-6xl font-michroma font-bold text-gray-900">
+                CyberLink
               </h1>
               
               <p className="text-lg text-gray-600 leading-relaxed">
@@ -210,7 +210,7 @@ const LandingPage = () => {
       <section className="py-20 bg-light-gray">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-michroma font-bold text-gray-900 mb-4">
               Choose Your Role
             </h2>
             <p className="text-xl text-gray-600">
@@ -260,7 +260,7 @@ const LandingPage = () => {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-michroma font-bold text-gray-900 mb-4">
               Powerful Features
             </h2>
             <p className="text-xl text-gray-600">
@@ -290,7 +290,7 @@ const LandingPage = () => {
       <section className="py-20 bg-light-gray">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-michroma font-bold text-gray-900 mb-4">
               What Our Users Say
             </h2>
             <p className="text-xl text-gray-600">
