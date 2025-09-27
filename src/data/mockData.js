@@ -584,3 +584,206 @@ export const mockRippleEffects = [
     color: "#EF4444"
   }
 ]
+
+export const mockEventOpportunities = [
+  {
+    id: 1,
+    title: "Cyberjaya Tech Summit 2025",
+    organizer: "Malaysia Digital Economy Corporation",
+    organizerImage: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100",
+    eventImage: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400",
+    location: "Cyberjaya Convention Center",
+    date: "2025-11-15",
+    endDate: "2025-11-17",
+    expectedAttendees: 8500,
+    duration: "3 days",
+    vendorSpots: 45,
+    spotsLeft: 12,
+    applicationDeadline: "2025-10-30",
+    category: "Technology",
+    description: "The largest tech conference in Southeast Asia featuring AI, blockchain, and IoT innovations. Perfect opportunity for F&B vendors to serve tech professionals.",
+    requirements: [
+      "Food safety certification required",
+      "Minimum 2 years catering experience", 
+      "Ability to serve 500+ customers daily",
+      "Professional setup and branding"
+    ],
+    benefits: [
+      "High foot traffic (8,500+ attendees)",
+      "Premium location placement",
+      "Marketing support and promotion",
+      "Networking with industry leaders"
+    ],
+    fees: {
+      applicationFee: 200,
+      boothFee: 2500,
+      securityDeposit: 1000
+    },
+    tags: ["High Traffic", "Premium Event", "Tech Professionals"],
+    status: "Open",
+    urgency: "high",
+    aiRecommended: true,
+    matchScore: 94,
+    revenueEstimate: "RM 18,000 - RM 25,000"
+  },
+  {
+    id: 2,
+    title: "Malaysian Street Food Festival",
+    organizer: "Cyberjaya Municipality",
+    organizerImage: "https://images.unsplash.com/photo-1573164574511-73c773193279?w=100",
+    eventImage: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400",
+    location: "Shaftsbury Square",
+    date: "2025-10-28",
+    endDate: "2025-11-01",
+    expectedAttendees: 12000,
+    duration: "5 days",
+    vendorSpots: 80,
+    spotsLeft: 28,
+    applicationDeadline: "2025-10-15",
+    category: "Food & Culture",
+    description: "Celebrate Malaysia's diverse culinary heritage with local and international food vendors. Family-friendly event with cultural performances.",
+    requirements: [
+      "Halal certification preferred",
+      "Traditional or fusion cuisine",
+      "Outdoor setup capability",
+      "Weekend availability essential"
+    ],
+    benefits: [
+      "Massive foot traffic (12,000+ visitors)",
+      "Cultural appreciation focus",
+      "Media coverage and publicity",
+      "Family audience demographic"
+    ],
+    fees: {
+      applicationFee: 150,
+      boothFee: 1800,
+      securityDeposit: 800
+    },
+    tags: ["Cultural", "Family Event", "High Volume"],
+    status: "Open",
+    urgency: "medium",
+    aiRecommended: true,
+    matchScore: 89,
+    revenueEstimate: "RM 12,000 - RM 20,000"
+  },
+  {
+    id: 3,
+    title: "Startup Weekend Cyberjaya",
+    organizer: "Tech Entrepreneurs Network",
+    organizerImage: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=100",
+    eventImage: "https://images.unsplash.com/photo-1559223607-b4d0555ae8dd?w=400",
+    location: "MSC Malaysia Innovation Hub",
+    date: "2025-11-08",
+    endDate: "2025-11-10",
+    expectedAttendees: 2500,
+    duration: "3 days",
+    vendorSpots: 15,
+    spotsLeft: 4,
+    applicationDeadline: "2025-10-25",
+    category: "Business & Entrepreneurship",
+    description: "Intensive startup accelerator weekend with mentoring sessions, pitching competitions, and networking events for emerging entrepreneurs.",
+    requirements: [
+      "24/7 availability for weekend",
+      "Quick service capability",
+      "Healthy food options preferred",
+      "Flexible menu for different budgets"
+    ],
+    benefits: [
+      "Access to startup ecosystem",
+      "Future business opportunities",
+      "Direct customer feedback",
+      "Potential partnership opportunities"
+    ],
+    fees: {
+      applicationFee: 100,
+      boothFee: 1200,
+      securityDeposit: 500
+    },
+    tags: ["Startup Community", "Networking", "Innovation"],
+    status: "Open",
+    urgency: "high",
+    aiRecommended: false,
+    matchScore: 76,
+    revenueEstimate: "RM 6,000 - RM 10,000"
+  },
+  {
+    id: 4,
+    title: "Green Technology Expo",
+    organizer: "Sustainable Future Malaysia",
+    organizerImage: "https://images.unsplash.com/photo-1581092918484-8313fb2f5d84?w=100",
+    eventImage: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+    location: "Putrajaya International Convention Centre",
+    date: "2025-12-03",
+    endDate: "2025-12-05",
+    expectedAttendees: 6000,
+    duration: "3 days",
+    vendorSpots: 30,
+    spotsLeft: 18,
+    applicationDeadline: "2025-11-15",
+    category: "Sustainability",
+    description: "Showcasing green technology solutions and sustainable practices. Focus on eco-friendly vendors and sustainable food options.",
+    requirements: [
+      "Eco-friendly packaging mandatory",
+      "Sustainable sourcing practices",
+      "Zero-waste approach preferred",
+      "Organic/local ingredients focus"
+    ],
+    benefits: [
+      "Sustainability-focused audience",
+      "Government official attendance",
+      "International media coverage",
+      "CSR partnership opportunities"
+    ],
+    fees: {
+      applicationFee: 180,
+      boothFee: 2200,
+      securityDeposit: 900
+    },
+    tags: ["Eco-Friendly", "Government Event", "Sustainability"],
+    status: "Open",
+    urgency: "low",
+    aiRecommended: false,
+    matchScore: 68,
+    revenueEstimate: "RM 10,000 - RM 16,000"
+  },
+  {
+    id: 5,
+    title: "Digital Art & Creative Festival",
+    organizer: "Creative Industries Development Agency",
+    organizerImage: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=100",
+    eventImage: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400",
+    location: "Cyberjaya Creative Hub",
+    date: "2025-11-22",
+    endDate: "2025-11-24",
+    expectedAttendees: 4500,
+    duration: "3 days",
+    vendorSpots: 25,
+    spotsLeft: 8,
+    applicationDeadline: "2025-11-05",
+    category: "Arts & Culture",
+    description: "Celebrating digital creativity with interactive installations, workshops, and performances. Artistic and creative food presentations welcomed.",
+    requirements: [
+      "Creative food presentation",
+      "Instagram-worthy setup",
+      "Artistic menu design",
+      "Flexible serving times"
+    ],
+    benefits: [
+      "Creative community exposure",
+      "Social media visibility",
+      "Artistic collaboration opportunities",
+      "Young demographic audience"
+    ],
+    fees: {
+      applicationFee: 120,
+      boothFee: 1500,
+      securityDeposit: 600
+    },
+    tags: ["Creative", "Instagram-worthy", "Young Audience"],
+    status: "Closing Soon",
+    urgency: "high",
+    aiRecommended: true,
+    matchScore: 82,
+    revenueEstimate: "RM 8,000 - RM 14,000"
+  }
+]

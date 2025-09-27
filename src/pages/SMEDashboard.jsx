@@ -3,7 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import DashboardLayout from '../components/DashboardLayout'
 import { DemandChart, MetricCard } from '../components/Charts'
 import { FreelancerCard, AlertCard } from '../components/Cards'
-import { mockDemandData, mockAlerts, mockFreelancers, mockCampaigns, mockDeliveryRoutes, mockPostedJobs, mockAppliedFreelancers, mockRecommendedFreelancers } from '../data/mockData'
+import { mockDemandData, mockAlerts, mockFreelancers, mockCampaigns, mockDeliveryRoutes, mockPostedJobs, mockAppliedFreelancers, mockRecommendedFreelancers, mockEventOpportunities } from '../data/mockData'
 import { generateCampaignText, generatePosterImage, generateCampaignVariations } from '../utils/geminiAPI'
 import { 
   Home, 
@@ -24,7 +24,13 @@ import {
   Download,
   Copy,
   Cloud,
-  Calendar
+  Calendar,
+  CheckCircle,
+  ExternalLink,
+  DollarSign,
+  Award,
+  Timer,
+  AlertCircle
 } from 'lucide-react'
 
 const SMEHome = () => {
@@ -34,6 +40,14 @@ const SMEHome = () => {
     eventBoost: "+35%",
     trafficLevel: "High"
   })
+
+  const [selectedEventCategory, setSelectedEventCategory] = useState('All')
+
+  const eventCategories = ['All', 'Technology', 'Food & Culture', 'Business & Entrepreneurship', 'Sustainability', 'Arts & Culture']
+
+  const filteredEvents = selectedEventCategory === 'All' 
+    ? mockEventOpportunities 
+    : mockEventOpportunities.filter(event => event.category === selectedEventCategory)
 
   return (
     <div className="space-y-8">
@@ -1650,6 +1664,478 @@ const FreelancerMarketplace = () => {
   )
 }
 
+const EventOpportunities = () => {
+  const [selectedEventCategory, setSelectedEventCategory] = useState('All')
+  const [selectedEvent, setSelectedEvent] = useState(null)
+  const [showApplicationModal, setShowApplicationModal] = useState(false)
+  const [sortBy, setSortBy] = useState('deadline') // deadline, match, revenue
+
+  const eventCategories = ['All', 'Technology', 'Food & Culture', 'Business & Entrepreneurship', 'Sustainability', 'Arts & Culture']
+
+  const filteredEvents = selectedEventCategory === 'All' 
+    ? mockEventOpportunities 
+    : mockEventOpportunities.filter(event => event.category === selectedEventCategory)
+
+  const sortedEvents = [...filteredEvents].sort((a, b) => {
+    switch (sortBy) {
+      case 'deadline':
+        return new Date(a.applicationDeadline) - new Date(b.applicationDeadline)
+      case 'match':
+        return (b.matchScore || 0) - (a.matchScore || 0)
+      case 'revenue':
+        const aRevenue = parseInt(a.revenueEstimate.split(' - RM ')[1]?.replace(/,/g, '') || '0')
+        const bRevenue = parseInt(b.revenueEstimate.split(' - RM ')[1]?.replace(/,/g, '') || '0')
+        return bRevenue - aRevenue
+      default:
+        return 0
+    }
+  })
+
+  const handleApply = (event) => {
+    setSelectedEvent(event)
+    setShowApplicationModal(true)
+  }
+
+  return (
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Event Opportunities</h1>
+          <p className="text-gray-600 mt-1">Discover and apply for vendor spots at upcoming events</p>
+        </div>
+        <div className="flex space-x-3">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="deadline">Sort by Deadline</option>
+            <option value="match">Sort by AI Match</option>
+            <option value="revenue">Sort by Revenue</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Statistics Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="card">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+              <Calendar size={20} className="text-primary-600" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-gray-900">
+                {mockEventOpportunities.filter(e => e.status === 'Open').length}
+              </div>
+              <div className="text-sm text-gray-600">Open Applications</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center">
+              <Zap size={20} className="text-secondary-600" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-gray-900">
+                {mockEventOpportunities.filter(e => e.aiRecommended).length}
+              </div>
+              <div className="text-sm text-gray-600">AI Recommended</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+              <AlertCircle size={20} className="text-red-600" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-gray-900">
+                {mockEventOpportunities.filter(e => e.urgency === 'high').length}
+              </div>
+              <div className="text-sm text-gray-600">Urgent Applications</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center">
+              <DollarSign size={20} className="text-success-600" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-gray-900">
+                RM {mockEventOpportunities.reduce((sum, e) => {
+                  const max = parseInt(e.revenueEstimate.split(' - RM ')[1]?.replace(/,/g, '') || '0')
+                  return sum + max
+                }, 0).toLocaleString()}
+              </div>
+              <div className="text-sm text-gray-600">Total Revenue Potential</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* AI Recommendations */}
+      {mockEventOpportunities.filter(e => e.aiRecommended).length > 0 && (
+        <div className="card">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-8 h-8 bg-secondary-500 rounded-lg flex items-center justify-center">
+              <Zap size={16} className="text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">🤖 AI Recommended for You</h2>
+              <p className="text-sm text-gray-600">Events with highest match potential for your business</p>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {mockEventOpportunities.filter(e => e.aiRecommended).map(event => (
+              <div key={event.id} className="border border-secondary-200 rounded-lg p-4 bg-secondary-50">
+                <img 
+                  src={event.eventImage}
+                  alt={event.title}
+                  className="w-full h-40 object-cover rounded-lg mb-3"
+                />
+                <h3 className="font-semibold text-gray-900 mb-2">{event.title}</h3>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm bg-secondary-100 text-secondary-800 px-2 py-1 rounded-full">
+                    {event.matchScore}% Match
+                  </span>
+                  <span className="text-sm text-gray-600">{event.expectedAttendees.toLocaleString()} attendees</span>
+                </div>
+                <p className="text-xs text-gray-600 mb-3">{event.revenueEstimate}</p>
+                <button
+                  onClick={() => handleApply(event)}
+                  className="w-full bg-green-700 text-white py-2 rounded-lg text-sm hover:bg-green-800 transition-colors font-poppins"
+                >
+                  Apply Now
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Category Filter */}
+      <div className="card">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-gray-900">Filter by Category</h2>
+          <span className="text-sm text-gray-600">{sortedEvents.length} events found</span>
+        </div>
+        <div className="flex items-center space-x-2 overflow-x-auto pb-2">
+          {eventCategories.map(category => (
+            <button
+              key={category}
+              onClick={() => setSelectedEventCategory(category)}
+              className={`px-4 py-2 text-sm rounded-full whitespace-nowrap transition-colors font-poppins ${
+                selectedEventCategory === category
+                  ? 'bg-primary-500 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {category}
+              {category !== 'All' && (
+                <span className="ml-2 text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
+                  {mockEventOpportunities.filter(e => e.category === category).length}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Event Opportunities List */}
+      <div className="space-y-6">
+        {sortedEvents.map(event => (
+          <div key={event.id} className={`card border-l-4 ${
+            event.urgency === 'high' ? 'border-red-500' :
+            event.urgency === 'medium' ? 'border-yellow-500' :
+            'border-primary-500'
+          }`} style={{ border: 'none'}}>
+            <div className="flex items-start space-x-6">
+              <img 
+                src={event.eventImage}
+                alt={event.title}
+                className="w-32 h-32 rounded-lg object-cover flex-shrink-0"
+              />
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-1">{event.title}</h3>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <img 
+                        src={event.organizerImage}
+                        alt={event.organizer}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                      <span className="text-sm text-gray-600">by {event.organizer}</span>
+                      <span className="text-sm text-gray-400">•</span>
+                      <span className="text-sm text-gray-600">{event.category}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col items-end space-y-2">
+                    <span className={`px-3 py-1 text-sm rounded-full font-medium ${
+                      event.status === 'Open' ? 'bg-primary-100 text-primary-800' :
+                      event.status === 'Closing Soon' ? 'bg-orange-100 text-orange-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {event.status}
+                    </span>
+                    {event.aiRecommended && (
+                      <span className="px-2 py-1 text-xs bg-secondary-100 text-secondary-800 rounded-full">
+                        {event.matchScore}% AI Match
+                      </span>
+                    )}
+                    {event.urgency === 'high' && (
+                      <div className="flex items-center space-x-1 text-red-600">
+                        <AlertCircle size={12} />
+                        <span className="text-xs font-medium">Urgent!</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <p className="text-gray-700 text-sm mb-4 line-clamp-2">{event.description}</p>
+
+                {/* Event Details Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Calendar size={14} className="text-gray-500" />
+                    <div>
+                      <div className="text-gray-600">{event.date}</div>
+                      <div className="text-xs text-gray-500">{event.duration}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 text-sm">
+                    <MapPin size={14} className="text-gray-500" />
+                    <div>
+                      <div className="text-gray-600 truncate">{event.location}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Users size={14} className="text-gray-500" />
+                    <div>
+                      <div className="text-gray-600">{event.expectedAttendees.toLocaleString()}</div>
+                      <div className="text-xs text-gray-500">attendees</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Timer size={14} className="text-gray-500" />
+                    <div>
+                      <div className="text-gray-600">Apply by</div>
+                      <div className="text-xs text-gray-500">{event.applicationDeadline}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Key Metrics */}
+                <div className="grid md:grid-cols-3 gap-4 mb-4">
+                  <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                    <div className="text-xs text-gray-500 mb-1">Available Spots</div>
+                    <div className="font-semibold text-gray-900 mb-2">
+                      {event.spotsLeft} of {event.vendorSpots}
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-primary-500 h-2 rounded-full"
+                        style={{ width: `${((event.vendorSpots - event.spotsLeft) / event.vendorSpots) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                    <div className="text-xs text-gray-500 mb-1">Revenue Estimate</div>
+                    <div className="font-semibold text-success-600">{event.revenueEstimate}</div>
+                  </div>
+                  
+                  <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                    <div className="text-xs text-gray-500 mb-1">Total Investment</div>
+                    <div className="font-semibold text-gray-900">
+                      RM {(event.fees.applicationFee + event.fees.boothFee).toLocaleString()}
+                    </div>
+                    <div className="text-xs text-gray-500">+ RM {event.fees.securityDeposit.toLocaleString()} deposit</div>
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {event.tags.map((tag, index) => (
+                    <span key={index} className="px-2 py-1 text-xs bg-primary-100 text-primary-800 rounded-full">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center justify-between pt-4 border-t">
+                  <div className="text-sm text-gray-600">
+                    Deadline in {Math.ceil((new Date(event.applicationDeadline) - new Date()) / (1000 * 60 * 60 * 24))} days
+                  </div>
+                  <div className="flex justify-end">
+                    <button 
+                      onClick={() => handleApply(event)}
+                      className="px-4 py-2 text-sm rounded-lg font-medium transition-colors font-poppins bg-green-700 text-white hover:bg-green-800"
+                    >
+                      <ExternalLink size={14} className="inline mr-1" />
+                      Apply Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Application Modal */}
+      {showApplicationModal && selectedEvent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">Apply for {selectedEvent.title}</h3>
+                <button 
+                  onClick={() => setShowApplicationModal(false)}
+                  className="text-gray-400 hover:text-gray-600 font-poppins"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Event Summary */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center space-x-4 mb-3">
+                    <img src={selectedEvent.eventImage} alt="" className="w-24 h-24 rounded-lg object-cover" />
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{selectedEvent.title}</h4>
+                      <p className="text-sm text-gray-600">{selectedEvent.location}</p>
+                      <p className="text-sm text-gray-600">{selectedEvent.date} • {selectedEvent.duration}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-500">Booth Fee:</span>
+                      <div className="font-semibold">RM {selectedEvent.fees.boothFee.toLocaleString()}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Application Fee:</span>
+                      <div className="font-semibold">RM {selectedEvent.fees.applicationFee}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Deposit:</span>
+                      <div className="font-semibold">RM {selectedEvent.fees.securityDeposit.toLocaleString()}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Application Form */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Business Name *</label>
+                    <input 
+                      type="text" 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                      placeholder="CyberLink Café"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Business Category *</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                      <option>Food & Beverage</option>
+                      <option>Technology</option>
+                      <option>Retail</option>
+                      <option>Services</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Products/Services Description *</label>
+                    <textarea
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                      placeholder="Describe what you'll be offering at this event..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Previous Event Experience</label>
+                    <textarea
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                      placeholder="Brief description of your event experience..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Special Requirements</label>
+                    <div className="space-y-2">
+                      <label className="flex items-center">
+                        <input type="checkbox" className="mr-2" />
+                        <span className="text-sm">Electrical power required</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input type="checkbox" className="mr-2" />
+                        <span className="text-sm">Water connection needed</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input type="checkbox" className="mr-2" />
+                        <span className="text-sm">Additional storage space</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Contact Information</label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <input 
+                        type="email" 
+                        placeholder="Email address"
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                      />
+                      <input 
+                        type="tel" 
+                        placeholder="Phone number"
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex space-x-3 pt-4 border-t">
+                  <button 
+                    onClick={() => setShowApplicationModal(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-poppins"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setShowApplicationModal(false)
+                      // Handle application submission
+                    }}
+                    className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-poppins"
+                  >
+                    Submit Application
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const SMEDashboard = () => {
   const location = useLocation()
   
@@ -1657,6 +2143,7 @@ const SMEDashboard = () => {
     { name: 'Dashboard', href: '/sme', icon: Home, active: location.pathname === '/sme' },
     { name: 'Analytics', href: '/sme/analytics', icon: BarChart3, active: location.pathname === '/sme/analytics' },
     { name: 'Campaign Studio', href: '/sme/campaigns', icon: Megaphone, active: location.pathname === '/sme/campaigns' },
+    { name: 'Event Opportunities', href: '/sme/events', icon: Calendar, active: location.pathname === '/sme/events' },
     { name: 'Delivery & Logistics', href: '/sme/delivery', icon: Truck, active: location.pathname === '/sme/delivery' },
     { name: 'Freelancer Marketplace', href: '/sme/freelancers', icon: Users, active: location.pathname === '/sme/freelancers' }
   ]
@@ -1667,6 +2154,7 @@ const SMEDashboard = () => {
         <Route path="/" element={<SMEHome />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/campaigns" element={<CampaignStudio />} />
+        <Route path="/events" element={<EventOpportunities />} />
         <Route path="/delivery" element={<DeliveryLogistics />} />
         <Route path="/freelancers" element={<FreelancerMarketplace />} />
       </Routes>

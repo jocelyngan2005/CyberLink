@@ -113,6 +113,11 @@ body {
 }
 
 /* Button Styles */
+button {
+  font-family: 'Poppins', sans-serif;
+  border: none;
+}
+
 .btn-primary {
   background-color: var(--primary-600);
   color: white;
@@ -126,6 +131,7 @@ body {
   align-items: center;
   text-decoration: none;
   font-size: 0.875rem;
+  font-family: 'Poppins', sans-serif;
 }
 
 .btn-primary:hover {
@@ -145,6 +151,7 @@ body {
   align-items: center;
   text-decoration: none;
   font-size: 0.875rem;
+  font-family: 'Poppins', sans-serif;
 }
 
 .btn-secondary:hover {
@@ -157,13 +164,14 @@ body {
   font-weight: 600;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  border: 2px solid var(--primary-600);
+  border: none;
   cursor: pointer;
   transition: all 0.2s;
   display: inline-flex;
   align-items: center;
   text-decoration: none;
   font-size: 0.875rem;
+  font-family: 'Poppins', sans-serif;
 }
 
 .btn-outline:hover {
