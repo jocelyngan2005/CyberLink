@@ -68,6 +68,16 @@ const LandingPage = () => {
     }
   }
 
+  const scrollToFeatures = () => {
+    const featuresSection = document.getElementById('features-section')
+    if (featuresSection) {
+      featuresSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      })
+    }
+  }
+
   const stakeholders = [
     {
       id: 'freelancer',
@@ -98,21 +108,25 @@ const LandingPage = () => {
   const features = [
     {
       icon: Zap,
+      emoji: '🧠',
       title: 'AI-Powered Insights',
       description: 'Advanced AI algorithms provide real-time demand forecasting and smart recommendations'
     },
     {
       icon: TrendingUp,
+      emoji: '📈',
       title: 'Demand Forecasting',
       description: 'Predict customer demand patterns based on events, weather, and traffic data'
     },
     {
       icon: Users,
+      emoji: '🤝',
       title: 'Community Ecosystem',
       description: 'Connect freelancers, SMEs, and event organizers in one unified platform'
     },
     {
       icon: MapPin,
+      emoji: '🏙️',
       title: 'Smart City Integration',
       description: 'Seamlessly integrate with city infrastructure for optimal resource allocation'
     }
@@ -196,19 +210,36 @@ const LandingPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              {['DISCOVER OUR CITY VISION', 'WHO WE ARE', 'BECOME RESIDENT PARTNER'].map((item, index) => (
-                <motion.a 
-                  key={item}
-                  href="#" 
-                  className={`font-medium ${index === 2 ? 'text-green-600 hover:text-green-700 font-bold' : 'text-gray-700 hover:text-gray-900'}`}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.5 + index * 0.1 }}
-                  whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-                >
-                  {item}
-                </motion.a>
-              ))}
+              <motion.button
+                onClick={scrollToFeatures}
+                className="font-medium text-gray-700 hover:text-gray-900 bg-transparent border-none cursor-pointer"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.5 }}
+                whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+              >
+                DISCOVER OUR SMART ECONOMY
+              </motion.button>
+              <motion.a 
+                href="#" 
+                className="font-medium text-gray-700 hover:text-gray-900"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.6 }}
+                whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+              >
+                WHO WE ARE
+              </motion.a>
+              <motion.a 
+                href="#" 
+                className="font-medium text-gray-700 hover:text-gray-900"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.7 }}
+                whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+              >
+                BECOME RESIDENT PARTNER
+              </motion.a>
             </motion.nav>
 
             {/* Right Side */}
@@ -462,7 +493,8 @@ const LandingPage = () => {
 
       {/* Features Section */}
       <motion.section 
-        className="py-20"
+        id="features-section"
+        className="py-20 scroll-mt-16"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
@@ -532,7 +564,7 @@ const LandingPage = () => {
                   }}
                   viewport={{ once: true }}
                 >
-                  <feature.icon size={32} className="text-white" />
+                  <span className="text-3xl">{feature.emoji}</span>
                 </motion.div>
                 <motion.h3 
                   className="text-xl font-bold text-gray-900 mb-4"
