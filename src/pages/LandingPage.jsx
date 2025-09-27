@@ -78,6 +78,16 @@ const LandingPage = () => {
     }
   }
 
+  const scrollToTestimonials = () => {
+    const testimonialsSection = document.getElementById('testimonials-section')
+    if (testimonialsSection) {
+      testimonialsSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      })
+    }
+  }
+
   const stakeholders = [
     {
       id: 'freelancer',
@@ -218,18 +228,18 @@ const LandingPage = () => {
                 transition={{ duration: 0.4, delay: 0.5 }}
                 whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
               >
-                DISCOVER OUR SMART ECONOMY
+                DISCOVER OUR FEATURES
               </motion.button>
-              <motion.a 
-                href="#" 
-                className="font-medium text-gray-700 hover:text-gray-900"
+              <motion.button
+                onClick={scrollToTestimonials}
+                className="font-medium text-gray-700 hover:text-gray-900 bg-transparent border-none cursor-pointer"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.6 }}
                 whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
               >
-                WHO WE ARE
-              </motion.a>
+                USER EXPERIENCE
+              </motion.button>
               <motion.a 
                 href="#" 
                 className="font-medium text-gray-700 hover:text-gray-900"
@@ -238,7 +248,7 @@ const LandingPage = () => {
                 transition={{ duration: 0.4, delay: 0.7 }}
                 whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
               >
-                BECOME RESIDENT PARTNER
+                
               </motion.a>
             </motion.nav>
 
@@ -592,7 +602,8 @@ const LandingPage = () => {
 
       {/* Testimonials */}
       <motion.section 
-        className="py-20 bg-light-gray"
+        id="testimonials-section"
+        className="py-20 bg-light-gray scroll-mt-16"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
