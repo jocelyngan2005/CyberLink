@@ -143,10 +143,39 @@ const EventOrganizerHome = () => {
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {mockSMEs.map(sme => (
-            <div key={sme.id} className="border border-gray-200 rounded-lg">
-              <SMECard sme={sme} />
-              <div className="px-6 pb-4">
-                <button className="btn-primary text-sm w-full">
+            <div key={sme.id} className="border border-gray-200 rounded-lg flex flex-col bg-red-50" style={{ height: '200px !important', minHeight: '200px', maxHeight: '200px' }}>
+              <div className="flex-1 p-6 overflow-hidden">
+                <div className="flex items-start space-x-4 h-full">
+                  <img 
+                    src={sme.logo} 
+                    alt={sme.name}
+                    className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0 flex flex-col justify-between h-full">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 text-sm leading-tight">{sme.name}</h3>
+                      <p className="text-xs text-gray-600 mt-1">{sme.category}</p>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <div className="flex items-center space-x-1">
+                          <Star size={12} className="text-yellow-400 fill-current" />
+                          <span className="text-xs text-gray-600">{sme.rating}</span>
+                        </div>
+                        <span className="text-gray-400 text-xs">•</span>
+                        <span className="text-xs text-gray-600">{sme.distance}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {sme.specialties.slice(0, 1).map((specialty, index) => (
+                        <span key={index} className="text-xs bg-accent-100 text-accent-700 px-2 py-1 rounded-full">
+                          {specialty}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="px-6 pb-4 border-t border-gray-100">
+                <button className="btn-primary text-sm w-full py-2">
                   Send Invitation
                 </button>
               </div>
