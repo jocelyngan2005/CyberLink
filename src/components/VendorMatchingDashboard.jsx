@@ -22,48 +22,10 @@ import {
   ArrowRight,
   Target,
   TrendingUp,
-  Award
+  Award,
+  Check,
+  MessageCircle
 } from 'lucide-react';
-
-// Mock data for events
-const mockEvents = [
-  {
-    id: 1,
-    title: "Tech Innovation Summit 2025",
-    date: "2025-10-15",
-    location: "Convention Center, Downtown",
-    expectedAttendees: 2500,
-    category: "Technology",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop",
-    description: "Leading tech conference featuring AI, blockchain, and emerging technologies",
-    duration: "3 days",
-    budget: "$50,000"
-  },
-  {
-    id: 2,
-    title: "Gourmet Food Festival",
-    date: "2025-10-22", 
-    location: "City Park",
-    expectedAttendees: 5000,
-    category: "Food & Beverage",
-    image: "https://images.unsplash.com/photo-1567320276875-ccef2a6f54d5?w=400&h=100&fit=crop",
-    description: "A celebration of local and international cuisine with top chefs",
-    duration: "2 days", 
-    budget: "$75,000"
-  },
-  {
-    id: 3,
-    title: "Business Leadership Conference",
-    date: "2025-11-05",
-    location: "Grand Hotel Ballroom", 
-    expectedAttendees: 800,
-    category: "Business",
-    image: "https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=400&h=250&fit=crop",
-    description: "Executive leadership strategies and networking opportunities",
-    duration: "1 day",
-    budget: "$25,000"
-  }
-];
 
 // Mock vendor data
 const mockVendors = [
@@ -145,8 +107,8 @@ const mockVendors = [
   }
 ];
 
-const VendorMatchingDashboard = () => {
-  const [selectedEvent, setSelectedEvent] = useState(null);
+const VendorMatchingDashboard = ({ isOpen, onClose, eventData }) => {
+  const [selectedEvent, setSelectedEvent] = useState(eventData || null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -156,7 +118,11 @@ const VendorMatchingDashboard = () => {
   const [messageText, setMessageText] = useState("");
   const [messageSent, setMessageSent] = useState(false);
   const [vendors, setVendors] = useState(mockVendors);
+  const [showConfirmationPage, setShowConfirmationPage] = useState(false);
+  const [confirmedVendor, setConfirmedVendor] = useState(null);
 
+  // Check if this is being used as a modal (isOpen prop provided) vs standalone page
+  const isModalMode = isOpen !== undefined;
 
   const filteredVendors = vendors.filter(vendor => {
     const matchesCategory = selectedCategory === 'all' || vendor.category === selectedCategory;
@@ -174,320 +140,286 @@ const VendorMatchingDashboard = () => {
     );
   };
 
-  const getCategoryGradient = (category) => {
-    switch(category) {
-      case 'Technology': return 'from-blue-500 to-purple-600';
-      case 'Food & Beverage': return 'from-orange-500 to-red-500';
-      case 'Business': return 'from-gray-600 to-gray-800';
-      default: return 'from-gray-500 to-gray-600';
-    }
+  const handleVendorSelection = (vendor) => {
+    setConfirmedVendor(vendor);
+    setShowConfirmationPage(true);
+    updateVendorStatus(vendor.id, 'selected');
   };
 
-  if (!selectedEvent) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-        {/* Header */}
-        {/* Top header replaced with Choose Your Vendor */}
-        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 px-8 py-6">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900">Choose Your Vendor</h1>
-              <p className="text-xl text-gray-600 mt-2 max-w-2xl">Select a vendor to start generating AI-powered marketing materials and managing vendor partnerships</p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-900">John Doe</p>
-              <p className="text-xs text-gray-500">Event Organizer</p>
-            </div>
-          </div>
-        </div>
+  const handleBackToSelection = () => {
+    setShowConfirmationPage(false);
+    setConfirmedVendor(null);
+  };
 
-        {/* Vendor Selection */}
-        <div className="max-w-7xl mx-auto px-8 py-12">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {vendors.map(vendor => (
-              <div 
-                key={vendor.id}
-                onClick={() => setSelectedEvent(vendor)}
-                className="group cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-              >
-                <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 flex flex-col h-full">
-                  <div className="relative h-48 w-full overflow-hidden flex-shrink-0">
-                    <img 
-                      src={vendor.image}
-                      alt={vendor.name}
-                      className="object-cover w-full h-full"
-                      onError={e => { e.target.onerror=null; e.target.src='https://via.placeholder.com/400x192?text=No+Image'; }}
-                    />
-                    <span className={`absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm font-semibold`}>{vendor.category}</span>
-                  </div>
-                  <div className="p-6 flex flex-col flex-1 justify-between">
-                    <div>
-                      <h2 className="font-bold text-2xl mb-2">{vendor.name}</h2>
-                      <p className="text-gray-700 mb-3 line-clamp-2">{vendor.description}</p>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {vendor.specialties.map((tag, idx) => (
-                          <span key={idx} className="font-semibold text-sm text-gray-900 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex items-center text-gray-600 mb-4">
-                        <MapPin className="w-4 h-4 mr-2 text-red-500" />
-                        {vendor.location} • {vendor.distance}
-                      </div>
-                    </div>
-                    <button 
-                      className="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg flex items-center justify-center transition-colors duration-200"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedEvent(vendor);
-                      }}
-                    >
-                      Select Vendor <ArrowRight className="w-4 h-4 ml-2" />
-                    </button>
-                  </div>
+  // If this is being used as a modal and it's not open, return null
+  if (isModalMode && isOpen === false) return null;
+
+  // Show vendor selection page initially
+  if (!selectedEvent && !showConfirmationPage) {
+    // Determine wrapper classes based on modal vs standalone mode
+    const wrapperClass = isModalMode 
+      ? "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      : "";
+    
+    const contentClass = isModalMode 
+      ? "bg-white rounded-lg w-[95%] max-w-7xl h-[90%] flex flex-col overflow-hidden shadow-2xl"
+      : "min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50";
+
+    return (
+      <div className={wrapperClass}>
+        <div className={contentClass}>
+          {/* Header */}
+          <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 px-8 py-6">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                {isModalMode && onClose && (
+                  <button 
+                    onClick={onClose}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-600" />
+                  </button>
+                )}
+                <div>
+                  <h1 className="text-4xl font-bold text-gray-900">Choose Your Vendor</h1>
+                  <p className="text-xl text-gray-600 mt-2 max-w-2xl">Select a vendor to start generating AI-powered marketing materials and managing vendor partnerships</p>
                 </div>
               </div>
-            ))}
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900">John Doe</p>
+                <p className="text-xs text-gray-500">Event Organizer</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Vendor Selection */}
+          <div className={isModalMode ? "flex-1 overflow-y-auto" : ""}>
+            <div className="max-w-7xl mx-auto px-8 py-12">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {mockVendors.map(vendor => (
+                  <div 
+                    key={vendor.id}
+                    onClick={() => setSelectedEvent(vendor)}
+                    className="group cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+                  >
+                    <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 flex flex-col" style={{ height: '500px' }}>
+                      <div className="relative h-48 w-full overflow-hidden flex-shrink-0">
+                        <img 
+                          src={vendor.image}
+                          alt={vendor.name}
+                          className="object-cover w-full h-full"
+                          onError={e => { e.target.onerror=null; e.target.src='https://via.placeholder.com/400x192?text=No+Image'; }}
+                        />
+                        <span className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm font-semibold">{vendor.category}</span>
+                      </div>
+                      <div className="p-6 flex flex-col flex-1 justify-between">
+                        <div className="flex-1">
+                          <h2 className="font-bold text-xl mb-2 leading-tight">{vendor.name}</h2>
+                          <p className="text-gray-700 mb-3 text-sm leading-relaxed line-clamp-3" style={{ minHeight: '60px' }}>{vendor.description}</p>
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {vendor.specialties.slice(0, 3).map((tag, idx) => (
+                              <span key={idx} className="font-medium text-xs text-gray-900 bg-blue-50 px-2 py-1 rounded-full border border-blue-200">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                          <div className="flex items-center text-gray-600 mb-4 text-sm">
+                            <MapPin className="w-4 h-4 mr-2 text-red-500 flex-shrink-0" />
+                            <span className="truncate">{vendor.location} • {vendor.distance}</span>
+                          </div>
+                        </div>
+                        <button 
+                          className="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg flex items-center justify-center transition-colors duration-200"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleVendorSelection(vendor);
+                          }}
+                        >
+                          Select Vendor <ArrowRight className="w-4 h-4 ml-2" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 px-8 py-6 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button 
-              onClick={() => setSelectedEvent(null)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowRight className="w-5 h-5 rotate-180 text-gray-600" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{selectedEvent.title}</h1>
-              <p className="text-gray-600">Vendor Management Dashboard</p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-medium text-gray-900">John Doe</p>
-            <p className="text-xs text-gray-500">Event Organizer</p>
-          </div>
-        </div>
-      </div>
+  // Show confirmation page after vendor selection
+  if (showConfirmationPage && confirmedVendor) {
+    const wrapperClass = isModalMode 
+      ? "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      : "";
+      
+    const contentClass = isModalMode 
+      ? "bg-white rounded-lg w-[95%] max-w-7xl h-[90%] flex flex-col overflow-hidden shadow-2xl"
+      : "min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50";
 
-      <div className="max-w-7xl mx-auto px-8 py-8 space-y-8">
-        
-        {/* Event Overview Card */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="relative h-32 bg-gradient-to-r from-blue-600 to-purple-600">
-            <div className="absolute inset-0 bg-black/20"></div>
-            <div className="relative p-6 text-white">
-              <h2 className="text-2xl font-bold mb-2">{selectedEvent.title}</h2>
-              <p className="opacity-90">{selectedEvent.description}</p>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="grid md:grid-cols-4 gap-6">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Date</p>
-                  <p className="font-semibold text-gray-900">{selectedEvent.date}</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Expected Attendees</p>
-                  <p className="font-semibold text-gray-900">{selectedEvent.expectedAttendees.toLocaleString()}</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Location</p>
-                  <p className="font-semibold text-gray-900">{selectedEvent.location}</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Budget</p>
-                  <p className="font-semibold text-gray-900">{selectedEvent.budget}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-        {/* Vendor Applications */}
-        {isPosterPosted && (
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-white flex items-center">
-                    <Award className="w-6 h-6 mr-3" />
-                    Vendor Applications
-                  </h2>
-                  <p className="text-blue-100 mt-2">Review and manage vendor partnerships</p>
-                </div>
-                <div className="text-right text-white">
-                  <div className="text-3xl font-bold">{filteredVendors.length}</div>
-                  <div className="text-blue-100 text-sm">Total Applications</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Status Summary */}
-            <div className="grid md:grid-cols-3 gap-6 p-6 bg-gray-50 border-b border-gray-200">
-              <div className="bg-white rounded-xl p-4 text-center shadow-sm">
-                <div className="text-2xl font-bold text-amber-600 mb-1">
-                  {filteredVendors.filter(v => v.status === 'pending').length}
-                </div>
-                <div className="text-gray-600 text-sm">Pending Review</div>
-              </div>
-              
-              <div className="bg-white rounded-xl p-4 text-center shadow-sm">
-                <div className="text-2xl font-bold text-emerald-600 mb-1">
-                  {filteredVendors.filter(v => v.status === 'approved').length}
-                </div>
-                <div className="text-gray-600 text-sm">Approved</div>
-              </div>
-              
-              <div className="bg-white rounded-xl p-4 text-center shadow-sm">
-                <div className="text-2xl font-bold text-red-600 mb-1">
-                  {filteredVendors.filter(v => v.status === 'rejected').length}
-                </div>
-                <div className="text-gray-600 text-sm">Rejected</div>
-              </div>
-            </div>
-
-            {/* Filters */}
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex flex-wrap gap-4">
-                <div className="flex-1 min-w-80">
-                  <div className="relative">
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      placeholder="Search vendors by name or specialty..."
-                      className="pl-12 pr-4 py-3 w-full border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                </div>
-                
-                <select 
-                  className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
+    return (
+      <div className={wrapperClass}>
+        <div className={contentClass}>
+          {/* Header */}
+          <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 px-8 py-6 sticky top-0 z-40">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <button 
+                  onClick={handleBackToSelection}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <option value="all">All Categories</option>
-                  <option value="Food & Beverage">Food & Beverage</option>
-                  <option value="Technology">Technology</option>
-                  <option value="Entertainment">Entertainment</option>
-                </select>
-                
-                <select 
-                  className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                >
-                  <option value="all">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                </select>
+                  <ArrowRight className="w-5 h-5 rotate-180 text-gray-600" />
+                </button>
+                {isModalMode && onClose && (
+                  <button 
+                    onClick={onClose}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-600" />
+                  </button>
+                )}
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Vendor Selected Successfully! 🎉</h1>
+                  <p className="text-gray-600">Your vendor has been confirmed for the event</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900">John Doe</p>
+                <p className="text-xs text-gray-500">Event Organizer</p>
               </div>
             </div>
+          </div>
 
-            {/* Vendor List */}
-            <div className="divide-y divide-gray-100">
-              {filteredVendors.map(vendor => (
-                <div key={vendor.id} className="p-6 hover:bg-gray-50 transition-all duration-200">
+          <div className={isModalMode ? "flex-1 overflow-y-auto" : ""}>
+            <div className="max-w-7xl mx-auto px-8 py-12">
+              {/* Success Message */}
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                  <Check className="w-8 h-8 text-green-600" />
+                </div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Vendor Successfully Selected!</h2>
+                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                  You have successfully selected <strong>{confirmedVendor.name}</strong> for your event. 
+                  Here are the next steps to complete your booking.
+                </p>
+              </div>
+
+              {/* Vendor Summary Card */}
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-8 max-w-4xl mx-auto">
+                <div className="p-8">
                   <div className="flex items-start space-x-6">
                     <img 
-                      src={vendor.image} 
-                      alt={vendor.name}
-                      className="object-cover w-32 h-32 rounded-xl shadow-md"
-                      onError={e => { e.target.onerror=null; e.target.src='https://via.placeholder.com/400x180?text=No+Image'; }}
+                      src={confirmedVendor.image} 
+                      alt={confirmedVendor.name}
+                      className="w-24 h-24 rounded-xl object-cover"
                     />
-                    <div className="flex-1 flex flex-col justify-between">
-                      <div>
-                        <h3 className="font-bold text-2xl mb-2 text-gray-900">{vendor.name}</h3>
-                        <p className="text-gray-700 mb-3 line-clamp-2">{vendor.description}</p>
-                        <div className="flex flex-wrap gap-4 mb-4">
-                          {vendor.specialties.map((tag, idx) => (
-                            <span key={idx} className="font-semibold text-base text-gray-900 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-                              {tag}
-                            </span>
-                          ))}
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">{confirmedVendor.name}</h3>
+                      <p className="text-gray-600 mb-3">{confirmedVendor.description}</p>
+                      <div className="flex items-center space-x-6 text-sm">
+                        <div className="flex items-center space-x-1">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span className="font-medium">{confirmedVendor.rating}</span>
+                          <span className="text-gray-500">({confirmedVendor.reviews} reviews)</span>
                         </div>
-                        <div className="flex items-center text-gray-600 mb-4">
-                          <MapPin className="w-4 h-4 mr-2 text-red-500" />
-                          {vendor.location} • {vendor.distance}
+                        <div className="flex items-center space-x-1">
+                          <MapPin className="w-4 h-4 text-gray-400" />
+                          <span>{confirmedVendor.location}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <DollarSign className="w-4 h-4 text-gray-400" />
+                          <span>{confirmedVendor.price}</span>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-3 mt-2">
-                        {vendor.status === 'pending' && (
-                          <>
-                            <button 
-                              onClick={() => updateVendorStatus(vendor.id, 'approved')}
-                              className="flex items-center px-6 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-medium shadow-sm hover:shadow-md"
-                            >
-                              <ThumbsUp className="w-4 h-4 mr-2" />
-                              Approve
-                            </button>
-                            <button 
-                              onClick={() => updateVendorStatus(vendor.id, 'rejected')}
-                              className="flex items-center px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all font-medium shadow-sm hover:shadow-md"
-                            >
-                              <ThumbsDown className="w-4 h-4 mr-2" />
-                              Reject
-                            </button>
-                          </>
-                        )}
-                        <button 
-                          className="flex items-center px-6 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-all font-medium"
-                          onClick={() => { setSelectedVendor(vendor); setShowVendorModal(true); }}
-                        >
-                          <Eye className="w-4 h-4 mr-2" />
-                          View Details
-                        </button>
-                        <button 
-                          className="flex items-center px-6 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-all font-medium"
-                          onClick={() => { setSelectedVendor(vendor); setShowMessageModal(true); setMessageText(""); setMessageSent(false); }}
-                        >
-                          <MessageSquare className="w-4 h-4 mr-2" />
-                          Message
-                        </button>
+                    </div>
+                    <div className="text-right">
+                      <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        <Check className="w-4 h-4 mr-1" />
+                        Selected
                       </div>
                     </div>
                   </div>
                 </div>
-              ))}
+              </div>
+
+              {/* Next Steps */}
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 max-w-4xl mx-auto mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Next Steps</h3>
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 font-semibold text-sm">1</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Contract & Agreement</h4>
+                      <p className="text-gray-600">Review and sign the vendor contract with terms and conditions.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 font-semibold text-sm">2</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Payment Setup</h4>
+                      <p className="text-gray-600">Setup payment terms and deposit requirements.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 font-semibold text-sm">3</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Final Coordination</h4>
+                      <p className="text-gray-600">Coordinate logistics, timing, and special requirements.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-center space-x-4">
+                <button
+                  onClick={handleBackToSelection}
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Select Another Vendor
+                </button>
+                <button
+                  onClick={() => {
+                    alert('Proceeding to contract and payment setup...');
+                  }}
+                  className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                >
+                  Proceed with Booking
+                </button>
+                <button
+                  onClick={() => {
+                    alert(`Contacting ${confirmedVendor.name}...`);
+                  }}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2 inline" />
+                  Contact Vendor
+                </button>
+              </div>
             </div>
           </div>
-        )}
+        </div>
+      </div>
+    );
+  }
+
+  // This shouldn't be reached in the current flow, but keeping it for completeness
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <div className="max-w-7xl mx-auto px-8 py-8">
+        <h1>Event Management Dashboard</h1>
+        <p>Selected Event: {selectedEvent?.name || selectedEvent?.title || "No event selected"}</p>
       </div>
     </div>
   );
-}
-
+};
 
 export default VendorMatchingDashboard;

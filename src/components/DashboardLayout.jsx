@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Menu, X, Bell, User, MessageSquare, LogOut } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 const DashboardLayout = ({ children, sidebarItems, title }) => {
@@ -39,9 +40,9 @@ const DashboardLayout = ({ children, sidebarItems, title }) => {
         
         <nav className="flex-1 px-4 py-6 space-y-2">
           {sidebarItems.map((item, index) => (
-            <a
+            <Link
               key={index}
-              href={item.href}
+              to={item.href}
               className={`flex items-center space-x-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 no-underline ${
                 item.active 
                   ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-600' 
@@ -55,7 +56,7 @@ const DashboardLayout = ({ children, sidebarItems, title }) => {
                   {item.badge}
                 </span>
               )}
-            </a>
+            </Link>
           ))}
         </nav>
 
