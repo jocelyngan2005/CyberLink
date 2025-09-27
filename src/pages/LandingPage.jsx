@@ -260,16 +260,24 @@ const LandingPage = () => {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <motion.div 
-                className="w-8 h-8 bg-gray-300 rounded-full overflow-hidden"
+                className="w-8 h-8 rounded-full overflow-hidden"
+                style={{ 
+                  background: 'transparent',
+                  clipPath: 'circle(50% at 50% 50%)'
+                }}
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ duration: 0.5, delay: 0.6, type: "spring" }}
                 whileHover={{ scale: 1.1 }}
               >
                 <img 
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150" 
+                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=faces" 
                   alt="Profile"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-full"
+                  style={{ 
+                    background: 'transparent',
+                    clipPath: 'circle(50% at 50% 50%)'
+                  }}
                 />
               </motion.div>
               <motion.button 
