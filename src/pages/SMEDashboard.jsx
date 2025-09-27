@@ -19,12 +19,49 @@ import {
   Image,
   Send,
   Star,
-  Navigation
+  Navigation,
+  Calendar,
+  Cloud
 } from 'lucide-react'
 
 const SMEHome = () => {
+  const [aiInsights, setAiInsights] = useState({
+    predictedCustomers: 1247,
+    weatherImpact: "+15%",
+    eventBoost: "+35%",
+    trafficLevel: "High"
+  })
+
   return (
     <div className="space-y-8">
+      {/* AI-Powered Insights Banner */}
+      <div className="card bg-gradient-to-r from-primary-500 to-secondary-500 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold mb-2">🤖 AI Insights Dashboard</h2>
+            <p className="text-primary-100">Real-time predictions based on traffic, weather, events & footfall</p>
+          </div>
+          <div className="text-right">
+            <div className="text-3xl font-bold">{aiInsights.predictedCustomers}</div>
+            <div className="text-primary-100">Predicted customers today</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-primary-400">
+          <div className="text-center">
+            <div className="text-lg font-semibold">{aiInsights.weatherImpact}</div>
+            <div className="text-primary-100 text-sm">Weather Impact</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-semibold">{aiInsights.eventBoost}</div>
+            <div className="text-primary-100 text-sm">Event Boost</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-semibold">{aiInsights.trafficLevel}</div>
+            <div className="text-primary-100 text-sm">Traffic Level</div>
+          </div>
+        </div>
+      </div>
+
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
@@ -57,24 +94,149 @@ const SMEHome = () => {
         />
       </div>
 
-      {/* Demand Forecast Chart */}
-      <DemandChart data={mockDemandData} />
+      {/* Enhanced AI Demand Forecasting */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <DemandChart data={mockDemandData} />
+        </div>
+        
+        {/* AI Data Sources */}
+        <div className="card">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">AI Data Sources</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                  <TrendingUp size={16} className="text-white" />
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">Traffic Data</div>
+                  <div className="text-sm text-gray-600">Real-time traffic flow</div>
+                </div>
+              </div>
+              <div className="text-blue-600 font-semibold">Active</div>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <Cloud size={16} className="text-white" />
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">Weather API</div>
+                  <div className="text-sm text-gray-600">Weather predictions</div>
+                </div>
+              </div>
+              <div className="text-green-600 font-semibold">Active</div>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                  <Calendar size={16} className="text-white" />
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">Event Calendar</div>
+                  <div className="text-sm text-gray-600">Upcoming events</div>
+                </div>
+              </div>
+              <div className="text-purple-600 font-semibold">Active</div>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                  <Users size={16} className="text-white" />
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">Footfall Sensors</div>
+                  <div className="text-sm text-gray-600">People counting</div>
+                </div>
+              </div>
+              <div className="text-orange-600 font-semibold">Active</div>
+            </div>
+          </div>
+          
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-medium text-gray-900 mb-2">Prediction Accuracy</h4>
+            <div className="flex items-center justify-between text-sm">
+              <span>Current Model</span>
+              <span className="font-semibold text-green-600">94.2%</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      {/* Alerts Section */}
+      {/* Enhanced AI Opportunity Alerts */}
       <div className="card">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
-              <AlertTriangle size={20} className="text-white" />
+            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <Zap size={20} className="text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Smart Alerts</h2>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">AI Opportunity Alerts</h2>
+              <p className="text-sm text-gray-600">Powered by AI, GenAI & AgentAI</p>
+            </div>
           </div>
           <span className="text-sm text-gray-500">Real-time insights</span>
         </div>
         
         <div className="space-y-4">
           {mockAlerts.map(alert => (
-            <AlertCard key={alert.id} alert={alert} />
+            <div key={alert.id} className={`p-4 rounded-lg border-l-4 ${
+              alert.severity === 'high' ? 'border-red-500 bg-red-50' :
+              alert.severity === 'medium' ? 'border-yellow-500 bg-yellow-50' :
+              'border-blue-500 bg-blue-50'
+            }`}>
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <h3 className="font-semibold text-gray-900">{alert.title}</h3>
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                      alert.aiType === 'AgentAI' ? 'bg-purple-100 text-purple-800' :
+                      alert.aiType === 'GenAI' ? 'bg-green-100 text-green-800' :
+                      'bg-blue-100 text-blue-800'
+                    }`}>
+                      {alert.aiType}
+                    </span>
+                  </div>
+                  <p className="text-gray-600 text-sm mb-3">{alert.description}</p>
+                  
+                  {/* Action-specific metrics */}
+                  {alert.eventAttendees && (
+                    <div className="flex items-center space-x-4 text-sm">
+                      <span className="bg-gray-100 px-2 py-1 rounded">👥 {alert.eventAttendees} attendees</span>
+                      <span className="bg-gray-100 px-2 py-1 rounded">📈 {alert.expectedDemand} demand</span>
+                      <span className="bg-gray-100 px-2 py-1 rounded">👤 {alert.suggestedStaff} staff needed</span>
+                    </div>
+                  )}
+                  
+                  {alert.locationRecommendation && (
+                    <div className="flex items-center space-x-4 text-sm">
+                      <span className="bg-gray-100 px-2 py-1 rounded">📍 {alert.locationRecommendation}</span>
+                      <span className="bg-gray-100 px-2 py-1 rounded">🚶 {alert.expectedFootfall} footfall</span>
+                    </div>
+                  )}
+                  
+                  {alert.campaignTheme && (
+                    <div className="flex items-center space-x-4 text-sm">
+                      <span className="bg-gray-100 px-2 py-1 rounded">🎯 {alert.campaignTheme}</span>
+                      <span className="bg-gray-100 px-2 py-1 rounded">👔 {alert.targetAudience}</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex flex-col items-end space-y-2">
+                  <span className="text-xs text-gray-500">{alert.time}</span>
+                  {alert.actionable && (
+                    <button className="btn-primary text-xs px-3 py-1">
+                      Take Action
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -128,9 +290,14 @@ const CampaignStudio = () => {
   const [posterPrompt, setPosterPrompt] = useState("")
 
   const handleGenerateText = () => {
-    // Mock AI text generation
-    const newContent = "🚀 FLASH SALE ALERT! Get ready for our exclusive Tech Innovation Week deals! Premium coffee blends at 30% off, perfect fuel for coding marathons. Pre-order your favorites and skip the queue. Available until supplies last! #TechWeek #CoffeeLovers #CyberjayadDeals"
-    setCampaignText(newContent)
+    // Mock GenAI text generation with multiple options
+    const genAIOptions = [
+      "🚀 FLASH SALE ALERT! Get ready for our exclusive Tech Innovation Week deals! Premium coffee blends at 30% off, perfect fuel for coding marathons. Pre-order your favorites and skip the queue. Available until supplies last! #TechWeek #CoffeeLovers #CyberjayadDeals",
+      "☔ Rainy Day Special! Stay cozy with our hot beverages and comfort food. Free delivery for orders above RM30. Beat the rain with our warming menu - perfect for today's weather! Order now before 8 PM. #RainyDayTreats #FreeDelivery",
+      "🎵 Concert Night Energy! Fuel up before the big show! Quick grab-and-go meals perfect for concert-goers. Located just 2 minutes from the venue entrance. Don't miss out - limited stock available! #ConcertFuel #QuickBites #EventSpecial"
+    ]
+    const randomContent = genAIOptions[Math.floor(Math.random() * genAIOptions.length)]
+    setCampaignText(randomContent)
   }
 
   const handleGeneratePoster = () => {
@@ -155,17 +322,39 @@ const CampaignStudio = () => {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8">
-        {/* Text Generator */}
+        {/* GenAI Text Generator */}
         <div className="card">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">AI Text Generator</h2>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">GenAI Text Generator</h2>
+              <p className="text-sm text-gray-600">Context-aware content based on events, weather & traffic</p>
+            </div>
             <button 
               onClick={handleGenerateText}
               className="btn-primary text-sm"
             >
               <Zap size={16} className="mr-2" />
-              Generate
+              Generate with AI
             </button>
+          </div>
+          
+          {/* GenAI Context Insights */}
+          <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+            <h3 className="font-medium text-gray-900 mb-3">🧠 GenAI Context Analysis</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-purple-600 font-medium">Current Context:</span>
+                <div className="text-gray-700">• Tech conference nearby</div>
+                <div className="text-gray-700">• Rain expected</div>
+                <div className="text-gray-700">• High office worker traffic</div>
+              </div>
+              <div>
+                <span className="text-pink-600 font-medium">Recommended Tone:</span>
+                <div className="text-gray-700">• Urgency & excitement</div>
+                <div className="text-gray-700">• Weather-aware</div>
+                <div className="text-gray-700">• Professional friendly</div>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -326,9 +515,19 @@ const DeliveryLogistics = () => {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Map View */}
+        {/* AgentAI Map View */}
         <div className="lg:col-span-2 card">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Live Map View</h2>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">AgentAI Smart Location Finder</h2>
+              <p className="text-sm text-gray-600">AI analyzes footfall, events, weather & competition</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-full font-medium">
+                AgentAI Active
+              </span>
+            </div>
+          </div>
           <div className="bg-gray-100 rounded-lg h-96 flex items-center justify-center relative overflow-hidden">
             <img 
               src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&h=400&fit=crop" 
@@ -381,8 +580,8 @@ const DeliveryLogistics = () => {
             ))}
           </div>
 
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-medium text-gray-900 mb-3">Route Optimization</h3>
+          <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+            <h3 className="font-medium text-gray-900 mb-3">🤖 AgentAI Route Optimization</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>Total Distance</span>
@@ -395,6 +594,19 @@ const DeliveryLogistics = () => {
               <div className="flex justify-between">
                 <span>Fuel Savings</span>
                 <span className="font-medium text-green-600">15%</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Revenue Potential</span>
+                <span className="font-medium text-purple-600">+RM 180</span>
+              </div>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t border-purple-200">
+              <h4 className="font-medium text-gray-900 mb-2">🎯 AgentAI Recommendations</h4>
+              <div className="space-y-1 text-xs">
+                <div className="text-purple-700">• Move to Shaftsbury at 2 PM (200% more footfall)</div>
+                <div className="text-blue-700">• Avoid Federal Highway until 3 PM (traffic jam)</div>
+                <div className="text-green-700">• Stock up on hot drinks (rain forecast)</div>
               </div>
             </div>
           </div>
@@ -446,14 +658,161 @@ const FreelancerMarketplace = () => {
         </button>
       </div>
 
+      {/* AI Job Recommendations */}
+      <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-lg p-6 border border-green-200 mb-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">🎯 AI Job Recommendations</h2>
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-lg p-4 border border-green-200">
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <h4 className="font-medium text-gray-900">Event Photography</h4>
+                <p className="text-sm text-gray-600">Wedding season peak</p>
+              </div>
+              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Hot</span>
+            </div>
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Rate:</span>
+                <span className="font-medium">RM 200/day</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Match:</span>
+                <span className="font-medium text-green-600">98%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Distance:</span>
+                <span className="font-medium">2.1 km</span>
+              </div>
+            </div>
+            <button className="w-full mt-3 bg-green-600 text-white text-sm py-2 rounded-lg hover:bg-green-700">
+              Apply Now
+            </button>
+          </div>
+          
+          <div className="bg-white rounded-lg p-4 border border-blue-200">
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <h4 className="font-medium text-gray-900">Social Media Content</h4>
+                <p className="text-sm text-gray-600">Remote work available</p>
+              </div>
+              <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Remote</span>
+            </div>
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Rate:</span>
+                <span className="font-medium">RM 50/post</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Match:</span>
+                <span className="font-medium text-blue-600">92%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Skills:</span>
+                <span className="font-medium">GenAI, Design</span>
+              </div>
+            </div>
+            <button className="w-full mt-3 bg-blue-600 text-white text-sm py-2 rounded-lg hover:bg-blue-700">
+              Apply Now
+            </button>
+          </div>
+          
+          <div className="bg-white rounded-lg p-4 border border-purple-200">
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <h4 className="font-medium text-gray-900">Customer Service</h4>
+                <p className="text-sm text-gray-600">AI-assisted support</p>
+              </div>
+              <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">AI+</span>
+            </div>
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Rate:</span>
+                <span className="font-medium">RM 18/hour</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Match:</span>
+                <span className="font-medium text-purple-600">89%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Training:</span>
+                <span className="font-medium">Provided</span>
+              </div>
+            </div>
+            <button className="w-full mt-3 bg-purple-600 text-white text-sm py-2 rounded-lg hover:bg-purple-700">
+              Apply Now
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Available Freelancers */}
       <div className="card">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Available Freelancers</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-6">🤖 AI-Matched Freelancers</h2>
         <div className="space-y-4">
-          {mockFreelancers.map(freelancer => (
+          {mockFreelancers.map((freelancer, index) => (
             <div key={freelancer.id} className="border border-gray-200 rounded-lg">
-              <FreelancerCard freelancer={freelancer} />
-              <div className="px-6 pb-4">
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold">
+                      {freelancer.name.charAt(0)}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{freelancer.name}</h3>
+                      <p className="text-sm text-gray-600">{freelancer.skills.join(", ")}</p>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <div className="flex text-yellow-400">
+                          {"★".repeat(Math.floor(freelancer.rating))}
+                        </div>
+                        <span className="text-sm text-gray-600">({freelancer.rating})</span>
+                        <span className="text-sm text-gray-500">• {freelancer.completedJobs} jobs</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-lg font-bold text-gray-900">RM {freelancer.hourlyRate}/hr</div>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        index % 3 === 0 ? 'bg-green-100 text-green-800' :
+                        index % 3 === 1 ? 'bg-blue-100 text-blue-800' :
+                        'bg-purple-100 text-purple-800'
+                      }`}>
+                        {index % 3 === 0 ? 'AI Match: 95%' :
+                         index % 3 === 1 ? 'GenAI Skills' :
+                         'AgentAI Ready'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* AI-powered insights */}
+                <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                  <h4 className="font-medium text-gray-900 mb-2">🎯 AI Insights</h4>
+                  <div className="text-sm space-y-1">
+                    {index % 3 === 0 && (
+                      <>
+                        <div className="text-green-700">• Perfect match for your event photography needs</div>
+                        <div className="text-blue-700">• Available this weekend during peak demand</div>
+                        <div className="text-gray-700">• Located 2.3km from your venue</div>
+                      </>
+                    )}
+                    {index % 3 === 1 && (
+                      <>
+                        <div className="text-blue-700">• Expert in GenAI content creation tools</div>
+                        <div className="text-green-700">• 15% faster delivery than average</div>
+                        <div className="text-gray-700">• Specialized in your industry</div>
+                      </>
+                    )}
+                    {index % 3 === 2 && (
+                      <>
+                        <div className="text-purple-700">• AgentAI certified for customer support</div>
+                        <div className="text-green-700">• Multilingual capabilities (EN, MS, CN)</div>
+                        <div className="text-gray-700">• Night shift availability</div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
                 <button className="btn-primary text-sm w-full">
                   Hire {freelancer.name}
                 </button>
