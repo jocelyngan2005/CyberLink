@@ -164,7 +164,7 @@ const economicImpactData = [
 
 // Enhanced MetricCard component with Glassmorphism
 const MetricCard = ({ title, value, change, icon: Icon, color, detail }) => (
-  <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:bg-white/90 group">
+  <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 transition-all duration-300 hover:shadow-2xl hover:scale-110 hover:bg-white/90 group">
     <div className="flex items-center justify-between mb-6">
       <div className={`p-4 rounded-2xl shadow-lg transition-all duration-300 group-hover:scale-110 ${
         color === 'success' ? 'bg-gradient-to-br from-green-100 to-emerald-100' :
@@ -367,6 +367,15 @@ const MapboxCityMap = ({ selectedLayer, timeFilter }) => {
     if (map.current) return
 
     mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN
+    console.log('Mapbox token:', mapboxgl.accessToken ? 'Present' : 'Missing')
+    
+    if (!mapboxgl.accessToken) {
+      console.error('❌ VITE_MAPBOX_TOKEN is not set in environment variables')
+      setError('Mapbox token not configured')
+      return
+    }
+
+    mapboxgl.accessToken = token
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -588,11 +597,22 @@ const MapboxCityMap = ({ selectedLayer, timeFilter }) => {
       />
       
       {/* Loading indicator */}
-      {!mapLoaded && (
+      {!mapLoaded && !error && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
             <p className="text-gray-600 text-sm">Loading map...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error indicator */}
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-red-50 rounded-lg border-2 border-red-200">
+          <div className="text-center">
+            <div className="text-red-500 text-4xl mb-2">⚠️</div>
+            <p className="text-red-600 text-sm font-medium">{error}</p>
+            <p className="text-red-500 text-xs mt-1">Please configure VITE_MAPBOX_TOKEN in .env file</p>
           </div>
         </div>
       )}
@@ -747,15 +767,12 @@ const SmartCityDashboard = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center space-x-3 px-6 py-4 rounded-xl font-semibold transition-all duration-300 ${
                   activeTab === tab.id
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-xl transform scale-105'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50 hover:shadow-md'
+                    ? 'bg-white text-gray-900 shadow-lg border-2 border-black transform scale-105'
+                    : 'text-gray-600 hover:scale-105 hover:text-gray-900 hover:bg-white/50 hover:shadow-md'
                 }`}
               >
-                <Icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-white' : 'text-gray-500'}`} />
+                <Icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-gray-900' : 'text-gray-500'}`} />
                 <span className="text-sm">{tab.name}</span>
-                {activeTab === tab.id && (
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                )}
               </button>
             );
           })}
@@ -909,12 +926,12 @@ const SmartCityDashboard = () => {
                   <h3 className="font-semibold text-gray-900 mb-4">Smart Recommendations</h3>
                   <div className="space-y-3 text-sm">
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 transition-all hover:shadow-md">
-                      <p className="font-medium text-blue-900">Parking Alert</p>
+                      <p className="font-bold text-blue-900">Parking Alert</p>
                       <p className="text-blue-700">Consider opening Zone C parking by 6 PM</p>
                     </div>
                     
                     <div className="bg-green-50 border border-green-200 rounded-lg p-3 transition-all hover:shadow-md">
-                      <p className="font-medium text-green-900">Transit Optimization</p>
+                      <p className="font-bold text-green-900">Transit Optimization</p>
                       <p className="text-green-700">Add shuttle service at 8 PM for peak departure</p>
                     </div>
                   </div>
@@ -968,12 +985,6 @@ const SmartCityDashboard = () => {
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600 font-medium">Capacity</span>
                           <span className="font-bold text-lg text-black">{lot.availableSlots}/{lot.totalSlots}</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-4 shadow-inner">
-                          <div 
-                            className="bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 h-4 rounded-full transition-all duration-1000 shadow-lg" 
-                            style={{ width: `${(lot.availableSlots / lot.totalSlots) * 100}%` }}
-                          ></div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
@@ -1143,11 +1154,11 @@ const SmartCityDashboard = () => {
                     </div>
 
                     <div className="flex space-x-2">
-                      <button className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                      <button className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors">
                         <Eye className="w-4 h-4 inline mr-2" />
                         View Details
                       </button>
-                      <button className="flex-1 bg-orange-600 text-white py-2 rounded-lg font-semibold hover:bg-orange-700 transition-colors">
+                      <button className="flex-1 bg-orange-600 text-black py-2 rounded-lg font-bold hover:bg-orange-700 transition-colors">
                         <AlertTriangle className="w-4 h-4 inline mr-2" />
                         Alert
                       </button>
