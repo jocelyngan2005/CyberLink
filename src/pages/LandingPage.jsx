@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { 
@@ -20,6 +20,7 @@ const LandingPage = () => {
   const navigate = useNavigate()
   const { login } = useAuth()
   const [selectedRole, setSelectedRole] = useState('')
+  const [isRoleSectionVisible, setIsRoleSectionVisible] = useState(false)
 
   const handleRoleSelection = (role) => {
     setSelectedRole(role)
@@ -41,6 +42,45 @@ const LandingPage = () => {
         break
     }
   }
+
+  const scrollToRoleSelection = () => {
+    const roleSection = document.getElementById('role-selection')
+    if (roleSection) {
+      roleSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      })
+      // Trigger animation after a short delay to ensure scrolling starts
+      setTimeout(() => {
+        setIsRoleSectionVisible(true)
+      }, 300)
+    }
+  }
+
+  // Intersection Observer for scroll-triggered animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.target.id === 'role-selection' && entry.isIntersecting) {
+            setIsRoleSectionVisible(true)
+          }
+        })
+      },
+      { threshold: 0.3 }
+    )
+
+    const roleSection = document.getElementById('role-selection')
+    if (roleSection) {
+      observer.observe(roleSection)
+    }
+
+    return () => {
+      if (roleSection) {
+        observer.unobserve(roleSection)
+      }
+    }
+  }, [])
 
   const stakeholders = [
     {
@@ -144,13 +184,13 @@ const LandingPage = () => {
             {/* Center Navigation */}
             <nav className="hidden sm:flex items-center space-x-8">
               <a href="#" className="text-gray-700 hover:text-gray-900 font-medium">
-                SCOPRI LA NOSTRA VISIONE DELLA CITTÀ
+                DISCOVER OUR CITY VISION
               </a>
               <a href="#" className="text-gray-700 hover:text-gray-900 font-medium">
-                CHI SIAMO
+                WHO WE ARE
               </a>
               <a href="#" className="text-green-600 hover:text-green-700 font-bold">
-                DIVENTA RESIDENT PARTNER
+                BECOME RESIDENT PARTNER
               </a>
             </nav>
 
@@ -178,7 +218,7 @@ const LandingPage = () => {
             {/* Left Column - Text Content */}
             <div className="space-y-6">
               <p className="text-gray-500 text-sm uppercase tracking-wide font-medium">
-                LA TUA NUOVA CASA NEL VERDE
+                YOUR NEW HOME IN THE GREEN
               </p>
               
               <h1 className="text-5xl md:text-6xl font-serif font-bold text-gray-900">
@@ -189,8 +229,11 @@ const LandingPage = () => {
                 Just remembering this principle of faith in oneself is enough to help us build a sustainable future for our communities. Through innovative technology and green initiatives, we create spaces where people can thrive in harmony with nature.
               </p>
               
-              <button className="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-8 rounded-full transition-colors duration-200">
-                CHIEDI DISPONIBILITÀ
+              <button 
+                onClick={scrollToRoleSelection}
+                className="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+              >
+                GET STARTED
               </button>
             </div>
 
@@ -207,25 +250,41 @@ const LandingPage = () => {
       </section>
 
       {/* Stakeholder Selection */}
-      <section className="py-20 bg-light-gray">
+      <section id="role-selection" className="py-20 bg-light-gray scroll-mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className={`text-center mb-16 transition-all duration-1000 transform ${
+            isRoleSectionVisible 
+              ? 'translate-y-0 opacity-100 scale-100' 
+              : 'translate-y-10 opacity-0 scale-95'
+          }`}>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4 transition-all duration-1200 delay-200">
               Choose Your Role
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-600 transition-all duration-1200 delay-400">
               Select your role to access personalized features and dashboards
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {stakeholders.map((stakeholder) => (
+            {stakeholders.map((stakeholder, index) => (
               <div
                 key={stakeholder.id}
-                className="card hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 group"
+                className={`card hover:shadow-xl transition-all duration-700 cursor-pointer transform hover:-translate-y-2 group ${
+                  isRoleSectionVisible 
+                    ? 'translate-y-0 opacity-100 scale-100' 
+                    : 'translate-y-16 opacity-0 scale-90'
+                }`}
+                style={{
+                  transitionDelay: isRoleSectionVisible ? `${600 + index * 200}ms` : '0ms'
+                }}
                 onClick={() => handleRoleSelection(stakeholder.id)}
               >
-                <div className={`w-16 h-16 bg-gradient-to-r ${stakeholder.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`w-16 h-16 bg-gradient-to-r ${stakeholder.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-all duration-500 ${
+                  isRoleSectionVisible ? 'animate-bounce-once' : ''
+                }`}
+                style={{
+                  animationDelay: isRoleSectionVisible ? `${800 + index * 200}ms` : '0ms'
+                }}>
                   <stakeholder.icon size={32} className="text-white" />
                 </div>
                 
