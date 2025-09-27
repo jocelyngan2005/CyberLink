@@ -133,27 +133,62 @@ export const mockDemandData = [
 export const mockAlerts = [
   {
     id: 1,
-    type: "high-demand",
-    title: "Concert nearby - Expected +200% demand",
-    description: "Major concert at Stadium Bukit Jalil will increase food delivery demand",
+    type: "event-opportunity",
+    title: "🎵 Tech Concert with 5,000 attendees tomorrow!",
+    description: "Major tech conference at Cyberjaya Convention Center. Hire 3-5 extra part-timers for cashier/delivery roles via marketplace.",
     time: "2 hours ago",
-    severity: "high"
+    severity: "high",
+    actionable: true,
+    aiType: "AgentAI",
+    expectedDemand: "+350%",
+    suggestedStaff: 5,
+    eventAttendees: 5000
   },
   {
     id: 2,
-    type: "weather",
-    title: "Rain expected - Delivery delays possible",
-    description: "Heavy rain forecasted for 6-8 PM, plan for longer delivery times",
+    type: "weather-impact",
+    title: "☔ Rain forecast - Indoor demand surge expected",
+    description: "Heavy rain 6-8 PM will boost indoor dining by 40%. Stock up beverages and hot food items.",
     time: "1 hour ago",
-    severity: "medium"
+    severity: "medium",
+    actionable: true,
+    aiType: "AI",
+    demandIncrease: "+40%"
   },
   {
     id: 3,
-    type: "traffic",
-    title: "Traffic congestion on Federal Highway",
-    description: "Alternative routes recommended for faster delivery",
+    type: "traffic-optimization",
+    title: "🚗 Traffic congestion detected - Route optimization active",
+    description: "Alternative routes suggested by AI. Switch to Persiaran APEC for 15% faster deliveries.",
     time: "30 minutes ago",
-    severity: "low"
+    severity: "low",
+    actionable: true,
+    aiType: "AI",
+    timeSavings: "15%"
+  },
+  {
+    id: 4,
+    type: "footfall-prediction",
+    title: "📈 High footfall predicted at Shaftsbury Square",
+    description: "AgentAI analysis shows 200% higher foot traffic 2-4 PM. Move food truck there for optimal sales.",
+    time: "45 minutes ago",
+    severity: "high",
+    actionable: true,
+    aiType: "AgentAI",
+    locationRecommendation: "Shaftsbury Square",
+    expectedFootfall: "+200%"
+  },
+  {
+    id: 5,
+    type: "demand-forecast",
+    title: "🤖 GenAI Marketing Opportunity",
+    description: "Create targeted social media campaign for office workers. GenAI suggests 'Healthy Lunch Combos' theme.",
+    time: "1 hour ago",
+    severity: "medium",
+    actionable: true,
+    aiType: "GenAI",
+    campaignTheme: "Healthy Lunch Combos",
+    targetAudience: "Office Workers"
   }
 ]
 
