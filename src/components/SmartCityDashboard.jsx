@@ -423,54 +423,42 @@ const GoogleCityMap = ({ selectedLayer, timeFilter }) => {
         infoWindowRef.current = new window.google.maps.InfoWindow();
 
         // Create parking markers
-        // Use only three colors: green, orange, and red
-        const COLORS = ['#10B981', '#F59E0B', '#EF4444'];
-        const cityPoints = [
-          { lat: 2.9213, lng: 101.6369, title: 'Cyberjaya Central Mall', color: COLORS[0], info: 'Parking: 85 slots', type: 'parking' },
-          { lat: 2.9240, lng: 101.6390, title: 'Shaftsbury Square', color: COLORS[1], info: 'Parking: 23 slots', type: 'parking' },
-          { lat: 2.9180, lng: 101.6320, title: 'MMU Campus', color: COLORS[2], info: 'Parking: 156 slots', type: 'parking' },
-          { lat: 2.9270, lng: 101.6410, title: 'Park & Ride', color: COLORS[0], info: 'Parking: 40 slots', type: 'parking' },
-          { lat: 2.9228, lng: 101.6355, title: 'Transit Hub', color: COLORS[1], info: 'Transit: Bus & LRT', type: 'transit' },
-          { lat: 2.9255, lng: 101.6420, title: 'Shuttle Stop', color: COLORS[2], info: 'Shuttle Stop', type: 'transit' },
-          { lat: 2.9190, lng: 101.6400, title: 'LRT Station', color: COLORS[0], info: 'Transit: LRT', type: 'transit' },
-          { lat: 2.9218, lng: 101.6375, title: 'Main Auditorium', color: COLORS[1], info: 'Crowd: High', type: 'crowd' },
-          { lat: 2.9205, lng: 101.6380, title: 'Food Court', color: COLORS[2], info: 'Crowd: Moderate', type: 'crowd' },
-          { lat: 2.9260, lng: 101.6330, title: 'Exhibition Hall', color: COLORS[0], info: 'Crowd: Low', type: 'crowd' },
-          { lat: 2.9245, lng: 101.6360, title: 'Security Post', color: COLORS[1], info: 'Security', type: 'security' },
-          { lat: 2.9280, lng: 101.6380, title: 'Police Booth', color: COLORS[2], info: 'Security', type: 'security' },
-          { lat: 2.9230, lng: 101.6340, title: 'Sanitation Station', color: COLORS[0], info: 'Sanitation', type: 'sanitation' },
-          { lat: 2.9195, lng: 101.6370, title: 'Restroom', color: COLORS[1], info: 'Sanitation', type: 'sanitation' },
-          { lat: 2.9220, lng: 101.6430, title: 'Tech Expo', color: COLORS[2], info: 'Event', type: 'event' },
-          { lat: 2.9170, lng: 101.6350, title: 'Startup Zone', color: COLORS[0], info: 'Event', type: 'event' },
-          { lat: 2.9250, lng: 101.6300, title: 'Green Park', color: COLORS[1], info: 'Park', type: 'park' },
-          { lat: 2.9290, lng: 101.6370, title: 'Art Space', color: COLORS[2], info: 'Art', type: 'art' },
+        const parkingData = [
+          { lat: 2.9213, lng: 101.6369, title: 'Cyberjaya Central Mall', occupancy: '85%', available: 85 },
+          { lat: 2.9233, lng: 101.6389, title: 'Shaftsbury Square', occupancy: '45%', available: 23 },
+          { lat: 2.9193, lng: 101.6349, title: 'MMU Campus', occupancy: '35%', available: 156 }
         ];
 
-        markersRef.current.parking = cityPoints.map(data => {
+        markersRef.current.parking = parkingData.map(data => {
           const marker = new window.google.maps.Marker({
             position: { lat: data.lat, lng: data.lng },
             map: map.current,
             title: data.title,
             icon: {
               path: window.google.maps.SymbolPath.CIRCLE,
-              fillColor: data.color,
-              fillOpacity: 0.85,
+              fillColor: data.available > 100 ? '#10B981' : data.available > 50 ? '#F59E0B' : '#EF4444',
+              fillOpacity: 0.8,
               strokeColor: '#ffffff',
               strokeWeight: 3,
               scale: 15
             }
           });
+
           marker.addListener('click', () => {
             infoWindowRef.current.setContent(`
               <div class="p-3 bg-white rounded-lg">
                 <h3 class="font-bold text-gray-900 mb-2">${data.title}</h3>
-                <p class="text-sm text-gray-600 mb-1">${data.info}</p>
-                <span class="inline-block px-2 py-1 rounded" style="background:${data.color};color:#fff">${data.type.charAt(0).toUpperCase() + data.type.slice(1)}</span>
+                <p class="text-sm text-gray-600 mb-1">Occupancy: <span class="font-semibold">${data.occupancy}</span></p>
+                <p class="text-sm text-gray-600 mb-3">Available: <span class="font-semibold">${data.available} slots</span></p>
+                <button class="px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
+                  Book Now
+                </button>
               </div>
             `);
             infoWindowRef.current.open(map.current, marker);
           });
-          return { marker, type: data.type, data };
+
+          return { marker, type: 'parking', data };
         });
 
         // Create event venue marker
@@ -642,6 +630,7 @@ const SmartCityDashboard = () => {
   const [selectedLayer, setSelectedLayer] = useState('all');
   const [timeFilter, setTimeFilter] = useState('current');
   const [timeRange, setTimeRange] = useState('24h');
+  const [showBookingSuccess, setShowBookingSuccess] = useState(false);
 
   useEffect(() => {
     loadCityData();
@@ -930,6 +919,60 @@ const SmartCityDashboard = () => {
           </div>
         )}
 
+        {/* Booking Success Animation */}
+        {showBookingSuccess && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="bg-white rounded-2xl shadow-2xl px-8 py-10 flex flex-col items-center animate-fade-in border-2 border-green-200">
+              <div className="w-16 h-16 mb-4 animate-bounce-in">
+                <svg className="w-full h-full text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="#D1FAE5" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M8 12l2 2 4-4" stroke="#10B981" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-green-600 mb-2">Booking Confirmed!</h3>
+              <p className="text-gray-700 text-base">Your booking was successful.</p>
+            </div>
+          </div>
+        )}
+
+        <style>{`
+          @keyframes fade-in { 
+            from { opacity: 0; transform: scale(0.95); } 
+            to { opacity: 1; transform: scale(1); } 
+          }
+          .animate-fade-in { 
+            animation: fade-in 0.5s cubic-bezier(.4,0,.2,1) forwards; 
+          }
+          @keyframes bounce-in { 
+            0% { transform: scale(0.5); } 
+            60% { transform: scale(1.2); } 
+            100% { transform: scale(1); } 
+          }
+          .animate-bounce-in { 
+            animation: bounce-in 0.6s cubic-bezier(.4,0,.2,1) forwards; 
+          }
+        `}</style>
+
+        {/* Booking Success Animation - Moved outside modal */}
+        {showBookingSuccess && (
+          <div className="fixed inset-0 flex items-center justify-center z-[100] pointer-events-none">
+            <div className="bg-white rounded-2xl shadow-2xl px-8 py-10 flex flex-col items-center animate-fade-in">
+              <svg className="w-16 h-16 text-green-500 mb-4 animate-bounce-in" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="#D1FAE5" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12l2 2 4-4" />
+              </svg>
+              <h3 className="text-2xl font-bold text-green-600 mb-2">Booking Confirmed!</h3>
+              <p className="text-gray-700 text-base">Your booking was successful.</p>
+            </div>
+            <style>{`
+              @keyframes fade-in { from { opacity: 0; transform: scale(0.95);} to { opacity: 1; transform: scale(1);} }
+              .animate-fade-in { animation: fade-in 0.5s cubic-bezier(.4,0,.2,1) forwards; }
+              @keyframes bounce-in { 0% { transform: scale(0.5);} 60% { transform: scale(1.2);} 100% { transform: scale(1);} }
+              .animate-bounce-in { animation: bounce-in 0.6s cubic-bezier(.4,0,.2,1) forwards; }
+            `}</style>
+          </div>
+        )}
+
         {/* Parking Tab */}
         {activeTab === 'parking' && (
           <div className="space-y-6">
@@ -990,7 +1033,7 @@ const SmartCityDashboard = () => {
                     </div>
 
                     <button 
-                      className="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:via-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl mt-auto"
+                      className="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 text-black py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:via-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl mt-auto"
                       onClick={() => {
                         setSelectedService(lot);
                         setShowBookingModal(true);
@@ -1066,7 +1109,7 @@ const SmartCityDashboard = () => {
                     </div>
 
                     <button 
-                      className="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:via-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl mt-auto"
+                      className="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 text-black py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:via-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl mt-auto"
                       onClick={() => {
                         setSelectedService(route);
                         setShowBookingModal(true);
@@ -1416,11 +1459,16 @@ const SmartCityDashboard = () => {
                     Cancel
                   </button>
                   <button 
-                    className={`flex-1 px-4 py-2 text-white rounded-lg font-semibold transition-all transform hover:scale-105 ${
+                    className={`flex-1 px-4 py-2 text-black rounded-lg font-semibold transition-all transform hover:scale-105 ${
                       activeTab === 'parking' 
                         ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800' 
                         : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800'
                     }`}
+                    onClick={() => {
+                      setShowBookingModal(false);
+                      setShowBookingSuccess(true);
+                      setTimeout(() => setShowBookingSuccess(false), 3000);
+                    }}
                   >
                     Confirm Booking
                   </button>
@@ -1432,7 +1480,6 @@ const SmartCityDashboard = () => {
       </div>
     </div>
   );
-  
 };
 
 export default SmartCityDashboard;
