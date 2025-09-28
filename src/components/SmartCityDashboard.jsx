@@ -426,7 +426,19 @@ const GoogleCityMap = ({ selectedLayer, timeFilter }) => {
         const parkingData = [
           { lat: 2.9213, lng: 101.6369, title: 'Cyberjaya Central Mall', occupancy: '85%', available: 85 },
           { lat: 2.9233, lng: 101.6389, title: 'Shaftsbury Square', occupancy: '45%', available: 23 },
-          { lat: 2.9193, lng: 101.6349, title: 'MMU Campus', occupancy: '35%', available: 156 }
+          { lat: 2.9193, lng: 101.6349, title: 'MMU Campus', occupancy: '35%', available: 156 },
+          { lat: 2.9275, lng: 101.6422, title: 'DPULZE Shopping Centre', occupancy: '60%', available: 60 },
+          { lat: 2.9180, lng: 101.6290, title: 'Cyberjaya Lake Gardens', occupancy: '20%', available: 200 },
+          { lat: 2.9250, lng: 101.6400, title: 'Tamarind Square', occupancy: '75%', available: 40 },
+          { lat: 2.9220, lng: 101.6320, title: 'Cyberview Resort & Spa', occupancy: '50%', available: 80 },
+          { lat: 2.9280, lng: 101.6380, title: 'MCMC Tower', occupancy: '90%', available: 10 },
+          { lat: 2.9300, lng: 101.6440, title: 'Cyberjaya Mosque', occupancy: '30%', available: 120 },
+          { lat: 2.9170, lng: 101.6310, title: 'University of Cyberjaya', occupancy: '40%', available: 90 },
+          { lat: 2.9245, lng: 101.6355, title: 'Cyberjaya Fire Station', occupancy: '10%', available: 300 },
+          { lat: 2.9290, lng: 101.6410, title: 'Cyberjaya Police Station', occupancy: '55%', available: 60 },
+          { lat: 2.9265, lng: 101.6375, title: 'Cyberjaya Hospital', occupancy: '80%', available: 30 },
+          { lat: 2.9205, lng: 101.6395, title: 'Cyberjaya Bus Terminal', occupancy: '65%', available: 50 },
+          { lat: 2.9270, lng: 101.6340, title: 'Cyberjaya Innovation Hub', occupancy: '25%', available: 110 }
         ];
 
         markersRef.current.parking = parkingData.map(data => {
