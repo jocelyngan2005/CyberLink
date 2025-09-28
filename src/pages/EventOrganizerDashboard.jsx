@@ -164,7 +164,7 @@ const EventOrganizerCampaignStudio = () => {
               ) : (
                 <div className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
                   <img 
-                    src={'/src/assets/tech-expo.jpg'}
+                    src={'/tech-expo.jpg'}
                     alt="Default Campaign Poster"
                     className="w-full h-auto object-contain max-h-96"
                   />
@@ -461,7 +461,7 @@ const EventOrganizerCampaignStudio = () => {
                 {showPosterGenerator ? (
                   <div className="space-y-4">
                     <img 
-                      src={generatedImage || '/src/assets/tech-expo.jpg'}
+                      src={generatedImage || '/tech-expo.jpg'}
                       alt="Poster"
                       className="w-full max-h-96 object-contain rounded-lg shadow-lg"
                     />
